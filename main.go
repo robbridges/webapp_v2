@@ -13,7 +13,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func contact(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprintf(w, "<h1>ContactPage</h1><p>To get in touch, email me at"+
+	fmt.Fprintf(w, "<h1>ContactPage</h1><p>To get in touch, email me at "+
 		"<a href=\"mailto:admin@lenslocked.com\">admin@lenslocked.com</a>")
 }
 
@@ -21,7 +21,7 @@ func faq(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	fmt.Fprintf(w, "<h1> FAQ PAGE </h1>"+
 		"<p> Q: Is there a free version?</p> \n "+
-		"<p> A: Yes! We offfer a free 30 day trial of all paid plans </p>")
+		"<p> A: Yes! We offer a free 30 day trial of all paid plans </p>")
 }
 
 func notFound(w http.ResponseWriter, r *http.Request) {
@@ -36,6 +36,7 @@ func main() {
 		Addr:    ":8080",
 		Handler: r,
 	}
+
 	r.NotFound(notFound)
 	r.Get("/", home)
 	r.Get("/contact", contact)
