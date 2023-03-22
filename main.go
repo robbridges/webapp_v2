@@ -9,10 +9,9 @@ import (
 	"path/filepath"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
+func executeTemplate(w http.ResponseWriter, filepath string) {
 	w.Header().Set("Content-Type", "text/html")
-	tplPath := filepath.Join("templates", "home.gohtml")
-	tpl, err := template.ParseFiles(tplPath)
+	tpl, err := template.ParseFiles(filepath)
 	if err != nil {
 		log.Printf("Parsing template %v", err)
 		http.Error(w, "There was an error parsing the template.", http.StatusInternalServerError)
@@ -26,10 +25,16 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func home(w http.ResponseWriter, r *http.Request) {
+
+	tplPath := filepath.Join("templates", "home.gohtml")
+	executeTemplate(w, tplPath)
+
+}
+
 func contact(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprintf(w, "<h1>ContactPage</h1><p>To get in touch, email me at "+
-		"<a href=\"mailto:admin@lenslocked.com\">admin@lenslocked.com</a>")
+	tplPath := filepath.Join("templates", "contact.gohtml")
+	executeTemplate(w, tplPath)
 }
 
 func faq(w http.ResponseWriter, r *http.Request) {
