@@ -8,7 +8,7 @@ import (
 
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprintf(w, "<h1> Welcome to LensLocked </h1>")
+	fmt.Fprintf(w, "<h1> Welcome to LensLocked! </h1>")
 }
 
 func contact(w http.ResponseWriter, r *http.Request) {
