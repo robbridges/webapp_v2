@@ -26,10 +26,8 @@ func executeTemplate(w http.ResponseWriter, filepath string) {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-
 	tplPath := filepath.Join("templates", "home.gohtml")
 	executeTemplate(w, tplPath)
-
 }
 
 func contact(w http.ResponseWriter, r *http.Request) {
@@ -38,11 +36,8 @@ func contact(w http.ResponseWriter, r *http.Request) {
 }
 
 func faq(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprintf(w, "<h1> FAQ PAGE </h1>"+
-		"<p> Q: Is there a free version?</p> \n "+
-		"<p> A: Yes! We offer a free 30 day trial of all paid plans </p>",
-	)
+	tplPath := filepath.Join("templates", "faq.gohtml")
+	executeTemplate(w, tplPath)
 }
 
 func notFound(w http.ResponseWriter, r *http.Request) {
