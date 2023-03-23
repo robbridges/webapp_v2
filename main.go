@@ -4,21 +4,20 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/robbridges/webapp_v2/views"
-	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 )
 
 func executeTemplate(w http.ResponseWriter, filepath string) {
-	tpl, err := template.ParseFiles(filepath)
+	tpl, err := views.Parse(filepath)
 	if err != nil {
 		log.Printf("Parsing template %v", err)
 		http.Error(w, "There was an error parsing the template.", http.StatusInternalServerError)
 		return
 	}
 	viewTpl := views.Template{
-		HtmlTpl: tpl,
+		HtmlTpl: tpl.HtmlTpl,
 	}
 	viewTpl.Execute(w, nil)
 }
