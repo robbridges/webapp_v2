@@ -3,39 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/robbridges/webapp_v2/controllers"
 	"github.com/robbridges/webapp_v2/views"
-	"log"
 	"net/http"
 	"path/filepath"
 )
-
-func executeTemplate(w http.ResponseWriter, filepath string) {
-	tpl, err := views.Parse(filepath)
-	if err != nil {
-		log.Printf("Parsing template %v", err)
-		http.Error(w, "There was an error parsing the template.", http.StatusInternalServerError)
-		return
-	}
-	viewTpl := views.Template{
-		HtmlTpl: tpl.HtmlTpl,
-	}
-	viewTpl.Execute(w, nil)
-}
-
-func home(w http.ResponseWriter, r *http.Request) {
-	tplPath := filepath.Join("templates", "home.gohtml")
-	executeTemplate(w, tplPath)
-}
-
-func contact(w http.ResponseWriter, r *http.Request) {
-	tplPath := filepath.Join("templates", "contact.gohtml")
-	executeTemplate(w, tplPath)
-}
-
-func faq(w http.ResponseWriter, r *http.Request) {
-	tplPath := filepath.Join("templates", "faq.gohtml")
-	executeTemplate(w, tplPath)
-}
 
 func notFound(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
@@ -44,16 +16,28 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
 	r := chi.NewRouter()
+	hometpl, err := views.Parse(filepath.Join("templates", "home.gohtml"))
+	if err != nil {
+		panic(err)
+	}
+	contactTpl, err := views.Parse(filepath.Join("templates", "contact.gohtml"))
+	if err != nil {
+		panic(err)
+	}
+	faqTpl, err := views.Parse(filepath.Join("templates", "faq.gohtml"))
+	if err != nil {
+		panic(err)
+	}
+
 	svr := http.Server{
 		Addr:    ":8080",
 		Handler: r,
 	}
 
 	r.NotFound(notFound)
-	r.Get("/", home)
-	r.Get("/contact", contact)
-	r.Get("/faq", faq)
+	r.Get("/", controllers.StaticHandler(hometpl))
+	r.Get("/contact", controllers.StaticHandler(contactTpl))
+	r.Get("/faq", controllers.StaticHandler(faqTpl))
 	svr.ListenAndServe()
 }
