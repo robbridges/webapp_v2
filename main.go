@@ -20,6 +20,7 @@ func main() {
 	homeTpl := views.Must(views.Parse(filepath.Join("templates", "home.gohtml")))
 	contactTpl := views.Must(views.Parse(filepath.Join("templates", "contact.gohtml")))
 	faqTpl := views.Must(views.Parse(filepath.Join("templates", "faq.gohtml")))
+	healthTpl := views.Must(views.Parse(filepath.Join("templates", "healthcheck.gohtml")))
 
 	svr := http.Server{
 		Addr:    ":8080",
@@ -30,5 +31,6 @@ func main() {
 	r.Get("/", controllers.StaticHandler(homeTpl))
 	r.Get("/contact", controllers.StaticHandler(contactTpl))
 	r.Get("/faq", controllers.StaticHandler(faqTpl))
+	r.Get("/healthcheck", controllers.StaticHandler(healthTpl))
 	svr.ListenAndServe()
 }
