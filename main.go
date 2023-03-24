@@ -17,7 +17,7 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := chi.NewRouter()
-	homeTpl := views.Must(views.ParseFS(templates.FS, "home.gohtml"))
+	homeTpl := views.Must(views.ParseFS(templates.FS, "home.gohtml", "layout-parts.gohtml"))
 	contactTpl := views.Must(views.ParseFS(templates.FS, "contact.gohtml"))
 	faqTpl := views.Must(views.ParseFS(templates.FS, "faq.gohtml"))
 	healthTpl := views.Must(views.ParseFS(templates.FS, "healthcheck.gohtml"))
