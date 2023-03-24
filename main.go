@@ -30,7 +30,7 @@ func main() {
 	r.NotFound(notFound)
 	r.Get("/", controllers.StaticHandler(homeTpl))
 	r.Get("/contact", controllers.StaticHandler(contactTpl))
-	r.Get("/faq", controllers.StaticHandler(faqTpl))
+	r.Get("/faq", controllers.FAQ(faqTpl))
 	r.Get("/healthcheck", controllers.StaticHandler(healthTpl))
 	svr.ListenAndServe()
 }
