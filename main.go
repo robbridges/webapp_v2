@@ -17,18 +17,9 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := chi.NewRouter()
-	hometpl, err := views.Parse(filepath.Join("templates", "home.gohtml"))
-	if err != nil {
-		panic(err)
-	}
-	contactTpl, err := views.Parse(filepath.Join("templates", "contact.gohtml"))
-	if err != nil {
-		panic(err)
-	}
-	faqTpl, err := views.Parse(filepath.Join("templates", "faq.gohtml"))
-	if err != nil {
-		panic(err)
-	}
+	homeTpl := views.Must(views.Parse(filepath.Join("templates", "home.gohtml")))
+	contactTpl := views.Must(views.Parse(filepath.Join("templates", "contact.gohtml")))
+	faqTpl := views.Must(views.Parse(filepath.Join("templates", "faq.gohtml")))
 
 	svr := http.Server{
 		Addr:    ":8080",
@@ -36,7 +27,7 @@ func main() {
 	}
 
 	r.NotFound(notFound)
-	r.Get("/", controllers.StaticHandler(hometpl))
+	r.Get("/", controllers.StaticHandler(homeTpl))
 	r.Get("/contact", controllers.StaticHandler(contactTpl))
 	r.Get("/faq", controllers.StaticHandler(faqTpl))
 	svr.ListenAndServe()
