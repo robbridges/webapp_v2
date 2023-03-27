@@ -31,11 +31,12 @@ func main() {
 		Handler: r,
 	}
 
-	r.NotFound(notFound)
 	r.Get("/", controllers.StaticHandler(homeTpl))
 	r.Get("/contact", controllers.StaticHandler(contactTpl))
 	r.Get("/faq", controllers.FAQ(faqTpl))
 	r.Get("/healthcheck", controllers.StaticHandler(healthTpl))
 	r.Get("/signup", usersC.New)
+	r.Post("/signup", usersC.Create)
+	r.NotFound(notFound)
 	svr.ListenAndServe()
 }
