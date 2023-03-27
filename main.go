@@ -23,6 +23,9 @@ func main() {
 	healthTpl := views.Must(views.ParseFS(templates.FS, "healthcheck.gohtml", "tailwind.gohtml"))
 	signupTpl := views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
 
+	usersC := controllers.Users{}
+	usersC.Templates.New = signupTpl
+
 	svr := http.Server{
 		Addr:    ":8080",
 		Handler: r,
@@ -33,6 +36,6 @@ func main() {
 	r.Get("/contact", controllers.StaticHandler(contactTpl))
 	r.Get("/faq", controllers.FAQ(faqTpl))
 	r.Get("/healthcheck", controllers.StaticHandler(healthTpl))
-	r.Get("/signup", controllers.StaticHandler(signupTpl))
+	r.Get("/signup", usersC.New)
 	svr.ListenAndServe()
 }
