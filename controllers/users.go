@@ -22,6 +22,7 @@ func (u Users) New(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "email:", r.FormValue("email"), r.FormValue("email"))
-	fmt.Fprintf(w, "password:", r.FormValue("password"), r.FormValue("password"))
+	fmt.Fprintf(w, "email:", r.FormValue("email"))
+	fmt.Fprintf(w, "password:", r.FormValue("password"))
+	fmt.Fprintf(w, "file:", r.FormValue("file"))
 }
