@@ -5,6 +5,8 @@ services:
   db: # The service will be named db.
     image: postgres # The postgres image will be used
     restart: always # Always try to restart if this stops running
+    volumes:
+      - ./models/sql/users.sql:/docker-entrypoint-initdb.d/db.sql
     environment: # Provide environment variables
       POSTGRES_USER: rob # POSTGRES_USER env var w/ value baloo
       POSTGRES_PASSWORD: redtruck
