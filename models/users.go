@@ -38,7 +38,6 @@ func (us *UserService) Create(email, password string) (*User, error) {
 		return nil, fmt.Errorf("create user: %w", err)
 	}
 
-	//stubbed out, but we'd convert this email and password to a new User to save to the database.
 	return &user, nil
 }
 
