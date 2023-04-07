@@ -23,6 +23,7 @@ func main() {
 	faqTpl := views.Must(views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml"))
 	healthTpl := views.Must(views.ParseFS(templates.FS, "healthcheck.gohtml", "tailwind.gohtml"))
 	signupTpl := views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
+	signinTpl := views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
 
 	cfg := models.DefaultPostgresConfig()
 	db, err := models.Open(cfg)
@@ -39,6 +40,7 @@ func main() {
 		UserService: &userService,
 	}
 	usersC.Templates.New = signupTpl
+	usersC.Templates.SignIn = signinTpl
 
 	svr := http.Server{
 		Addr:    ":8080",
@@ -51,6 +53,7 @@ func main() {
 	r.Get("/healthcheck", controllers.StaticHandler(healthTpl))
 	r.Get("/signup", usersC.New)
 	r.Post("/signup", usersC.Create)
+	r.Get("/signin", usersC.SignIn)
 	r.NotFound(notFound)
 	svr.ListenAndServe()
 }
