@@ -22,7 +22,7 @@ func (us *UserService) Create(email, password string) (*User, error) {
 
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, fmt.Errorf("create user: %w", err)
+		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 	passwordHash := string(hashedBytes)
 
@@ -35,7 +35,7 @@ func (us *UserService) Create(email, password string) (*User, error) {
 		VALUES ($1, $2) RETURNING id;`, email, passwordHash,
 	)
 	if err := row.Scan(&user.ID); err != nil {
-		return nil, fmt.Errorf("create user: %w", err)
+		return nil, fmt.Errorf("failed to insert user: %w", err)
 	}
 
 	return &user, nil

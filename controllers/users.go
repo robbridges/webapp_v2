@@ -57,6 +57,16 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
+	emailCookie, err := r.Cookie("email")
+	if err != nil {
+		fmt.Errorf("the email cookie was not available")
+		return
+	}
+
+	fmt.Fprintf(w, "Email cookie: %s\n", emailCookie.Value)
+}
+
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
