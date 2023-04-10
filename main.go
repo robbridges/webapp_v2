@@ -25,7 +25,7 @@ func main() {
 	faqTpl := views.Must(views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml"))
 	healthTpl := views.Must(views.ParseFS(templates.FS, "healthcheck.gohtml", "tailwind.gohtml"))
 	signupTpl := views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
-	signinTpl := views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
+	signInTpl := views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
 
 	cfg := models.DefaultPostgresConfig()
 	db, err := models.Open(cfg)
@@ -42,7 +42,7 @@ func main() {
 		UserService: &userService,
 	}
 	usersC.Templates.New = signupTpl
-	usersC.Templates.SignIn = signinTpl
+	usersC.Templates.SignIn = signInTpl
 	csrfKey := models.GenerateRandByteSlice()
 	csrfMw := csrf.Protect(csrfKey, csrf.Secure(false))
 	svr := http.Server{
