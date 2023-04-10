@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/csrf"
 	"github.com/robbridges/webapp_v2/controllers"
 	"github.com/robbridges/webapp_v2/models"
 	"github.com/robbridges/webapp_v2/templates"
@@ -18,6 +19,7 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := chi.NewRouter()
+
 	homeTpl := views.Must(views.ParseFS(templates.FS, "home.gohtml", "tailwind.gohtml"))
 	contactTpl := views.Must(views.ParseFS(templates.FS, "contact.gohtml", "tailwind.gohtml"))
 	faqTpl := views.Must(views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml"))
@@ -41,10 +43,11 @@ func main() {
 	}
 	usersC.Templates.New = signupTpl
 	usersC.Templates.SignIn = signinTpl
-
+	csrfKey := models.GenerateRandByteSlice()
+	csrfMw := csrf.Protect(csrfKey, csrf.Secure(false))
 	svr := http.Server{
 		Addr:    ":8080",
-		Handler: r,
+		Handler: csrfMw(r),
 	}
 
 	r.Get("/", controllers.StaticHandler(homeTpl))
