@@ -2,9 +2,9 @@
 <div class="py-12 flex justify-center">
     <div class="px-8 py-8 bg-white rounded shadow">
         <h1 class="pt-4 pb-8 text-center text-3xl font-bold text-gray-900">
-            Start sharing your photos today
+            Sign in to your account
         </h1>
-        <form action="/signup" method="post">
+        <form action="/signin" method="post">
             <div class="hidden">
                 {{csrfField}}
             </div>
@@ -30,12 +30,12 @@
                 <button type="submit"
                         class="w-full py-4 px-2 bg-indigo-600 hover:bg-indigo700 text-white rounded font-bold-text-lg"
                 >
-                    Sign up
+                    Sign in
                 </button>
             </div>
             <div class="py-2 w-full flex justify-between">
                 <p class="text-xs text-gray-500">
-                    <a href="/signin" class="underline">Already have an account?</a>
+                    <a href="/signup" class="underline">Need an account?</a>
                 </p>
                 <p class="text-xs text-gray-500">
                     <a href="/reset-pw" class="underline">Forgot your password?</a>

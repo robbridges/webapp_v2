@@ -2,6 +2,4 @@ lenslocked
 
 makefile
 
-
-cmd/exp/
-
+cmd/
