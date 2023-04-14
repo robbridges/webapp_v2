@@ -62,6 +62,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	emailCookie, err := r.Cookie("email")
 	if err != nil {
 		fmt.Errorf("the email cookie was not available")
+		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
 
