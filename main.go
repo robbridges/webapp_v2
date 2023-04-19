@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/robbridges/webapp_v2/controllers"
 	"github.com/robbridges/webapp_v2/models"
+	"github.com/robbridges/webapp_v2/rand"
 	"github.com/robbridges/webapp_v2/templates"
 	"github.com/robbridges/webapp_v2/views"
 	"net/http"
@@ -43,7 +44,7 @@ func main() {
 	}
 	usersC.Templates.New = signupTpl
 	usersC.Templates.SignIn = signInTpl
-	csrfKey := models.GenerateRandByteSlice()
+	csrfKey := rand.GenerateRandByteSlice()
 	csrfMw := csrf.Protect(csrfKey, csrf.Secure(false))
 	svr := http.Server{
 		Addr:    ":8080",
