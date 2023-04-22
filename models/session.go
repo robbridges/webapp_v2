@@ -3,8 +3,11 @@ package models
 import "database/sql"
 
 type Session struct {
-	ID        int
-	UserID    int
+	ID     int
+	UserID int
+	//Token is only set when creating a new session, we only store the has into the db, so if you're looking up a session
+	// This will be unavailable
+	Token     string
 	TokenHash string
 }
 

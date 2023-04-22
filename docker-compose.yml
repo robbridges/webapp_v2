@@ -8,7 +8,7 @@ services:
     volumes:
       - ./models/sql:/docker-entrypoint-initdb.d/
     environment: # Provide environment variables
-      POSTGRES_USER: rob # POSTGRES_USER env var w/ value baloo
+      POSTGRES_USER: rob # POSTGRES_USER env var w/ value rob
       POSTGRES_PASSWORD: redtruck
       POSTGRES_DB: lenslocked # Database name
     ports: # Expose ports so that apps not running via docker-compose can connect to them.
