@@ -6,8 +6,6 @@ import (
 	"fmt"
 )
 
-const SessionTokenBytes = 32
-
 func Bytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 	nRead, err := rand.Read(b)
@@ -32,13 +30,6 @@ func String(n int) (string, error) {
 		return "", fmt.Errorf("string: %w", err)
 	}
 	return base64.URLEncoding.EncodeToString(b), nil
-}
-
-// SessionToken is a very simple wrapper that takes the hard coded const and returns our token string, it uses our helper
-// method byte, to create the byte slice with crypto, it converts it a string, and this method uses a constant preset value
-
-func SessionToken() (string, error) {
-	return String(SessionTokenBytes)
 }
 
 // GenerateRandByteSlice is for our csrf byte slice
