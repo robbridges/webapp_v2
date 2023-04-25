@@ -1,6 +1,10 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+	"github.com/robbridges/webapp_v2/rand"
+)
 
 type Session struct {
 	ID     int
@@ -17,11 +21,20 @@ type SessionService struct {
 
 // Create will create a new session for the user provided the session token is the returned string to be stored
 // in our Postgres user table
-func (ss *SessionService) Create(userId int) (*Session, error) {
-	//Todo create the session token
-	//Todo Implement this method
+func (ss *SessionService) Create(userID int) (*Session, error) {
+	token, err := rand.SessionToken()
+	//TODO hash session token
+	if err != nil {
+		return nil, fmt.Errorf("create session token: %w", err)
+	}
+	session := Session{
+		UserID: userID,
+		Token:  token,
+		//TODO set token hash
+	}
 
-	return nil, nil
+	//Todo store session in database
+	return &session, nil
 }
 
 func (ss *SessionService) User(token string) (*User, error) {

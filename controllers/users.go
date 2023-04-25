@@ -73,7 +73,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
-	fmt.Fprintf(w, "Current user: %s\n", user.Email)
+	fmt.Fprintf(w, "Current user: %s\n", user)
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
@@ -83,8 +83,8 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
 	}
-	fmt.Fprintf(w, "User Created: %+v", user)
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
 		fmt.Println(err)
