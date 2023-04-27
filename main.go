@@ -9,8 +9,19 @@ import (
 	"github.com/robbridges/webapp_v2/rand"
 	"github.com/robbridges/webapp_v2/templates"
 	"github.com/robbridges/webapp_v2/views"
+	"github.com/spf13/viper"
 	"net/http"
 )
+
+func init() {
+	viper.SetConfigFile("local.env")
+	viper.AddConfigPath("./")
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("init: %w", err))
+	}
+}
 
 func notFound(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
