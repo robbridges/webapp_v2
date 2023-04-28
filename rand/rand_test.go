@@ -9,6 +9,7 @@ import (
 
 type errorReader struct{}
 
+// mock rand reader to error test
 func (r *errorReader) Read(p []byte) (int, error) {
 	return 0, errors.New("mocked error")
 }
@@ -19,6 +20,7 @@ func isString(v interface{}) bool {
 }
 
 func TestBytes_Error(t *testing.T) {
+
 	randReader := rand.Reader
 
 	defer func() {
