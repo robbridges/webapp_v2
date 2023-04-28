@@ -68,8 +68,7 @@ func (ss *SessionService) User(token string) (*User, error) {
 	INNER JOIN users u ON s.user_id = u.id
 	WHERE s.token_hash = $1;
 	`, tokenHash)
-	err := row.Scan(&user.Email, &user.PasswordHash)
-	if err != nil {
+	if err := row.Scan(&user.Email, &user.PasswordHash); err != nil {
 		return nil, fmt.Errorf("user: %w", err)
 	}
 	return &user, nil
