@@ -1,7 +1,10 @@
 package models
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 	"time"
 )
 
@@ -14,6 +17,30 @@ type DBLogger struct {
 	DB *sql.DB
 }
 
-func (logger *DBLogger) Create(err error) {
-	//TODO: Implement this so when this function is called we write the log to the Database
+func (logger *DBLogger) Create(err error) error {
+	errorTime := time.Now()
+	_, logError := logger.DB.Exec(`
+	INSERT INTO logs(message, timestamp) 
+	VALUES ($1, $2)
+	`, err.Error(), errorTime)
+	if logError != nil {
+		return logError
+	}
+	return nil
+}
+
+func LoggerMiddleware(logger *DBLogger) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Call the next handler and log any errors that occur
+			defer func() {
+				if err := recover(); err != nil {
+					logger.Create(fmt.Errorf("panic: %v", err))
+					http.Error(w, "Internal server error", http.StatusInternalServerError)
+				}
+			}()
+			ctx := context.WithValue(r.Context(), "logger", logger)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }

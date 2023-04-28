@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/robbridges/webapp_v2/models"
 	"net/http"
 )
 
@@ -26,8 +27,10 @@ func setCookie(w http.ResponseWriter, name, value string) {
 }
 
 func readCookie(r *http.Request, name string) (string, error) {
+	logger := r.Context().Value("logger").(*models.DBLogger)
 	c, err := r.Cookie(name)
 	if err != nil {
+		logger.Create(err)
 		return "", fmt.Errorf("cookie %s: read error: %w", name, err)
 	}
 	return c.Value, nil

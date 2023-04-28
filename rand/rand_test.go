@@ -47,14 +47,14 @@ func TestBytes_Error(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
-	t.Run("happy path", func(t *testing.T) {
-		b, err := Bytes(5)
-		if err != nil {
-			t.Errorf("Bytes slice not created")
-		}
-		string := base64.URLEncoding.EncodeToString(b)
-		if !isString(string) {
-			t.Errorf("Byte slice not correctly encoded into string")
-		}
-	})
+
+	b, err := Bytes(5)
+	if err != nil {
+		t.Errorf("Bytes slice not created")
+	}
+	string := base64.URLEncoding.EncodeToString(b)
+	if !isString(string) {
+		t.Errorf("Byte slice not correctly encoded into string")
+	}
+
 }

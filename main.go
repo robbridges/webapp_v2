@@ -29,6 +29,8 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<p> Oh no, nothing's here..")
 }
 
+var logger *models.DBLogger // Declare logger as a global variable
+
 func main() {
 	r := chi.NewRouter()
 
@@ -42,6 +44,7 @@ func main() {
 
 	cfg := models.DefaultPostgresConfig()
 	db, err := models.Open(cfg)
+
 	if err != nil {
 		panic(err)
 	}
@@ -52,6 +55,10 @@ func main() {
 	}
 
 	sessionService := models.SessionService{
+		DB: db,
+	}
+
+	logger = &models.DBLogger{
 		DB: db,
 	}
 
@@ -67,8 +74,11 @@ func main() {
 	csrfMw := csrf.Protect(csrfKey, csrf.Secure(false))
 	svr := http.Server{
 		Addr:    ":8080",
-		Handler: csrfMw(r),
+		Handler: r,
 	}
+
+	r.Use(models.LoggerMiddleware(logger))
+	r.Use(csrfMw)
 
 	r.Get("/", controllers.StaticHandler(homeTpl))
 	r.Get("/contact", controllers.StaticHandler(contactTpl))
