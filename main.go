@@ -75,6 +75,7 @@ func main() {
 	r.Post("/signup", usersC.Create)
 	r.Get("/signin", usersC.SignIn)
 	r.Post("/signin", usersC.ProcessSignIn)
+	r.Post("/signout", usersC.ProcessSignOut)
 	r.Get("/currentuser", usersC.CurrentUser)
 	r.NotFound(notFound)
 	svr.ListenAndServe()

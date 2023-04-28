@@ -76,19 +76,12 @@ func (ss *SessionService) User(token string) (*User, error) {
 	tokenHash := ss.hash(token)
 	var user User
 	row := ss.DB.QueryRow(`
-	SELECT user_id 
-	FROM sessions 
-	where token_hash = $1;`, tokenHash)
-	err := row.Scan(&user.ID)
-	if err != nil {
-		return nil, fmt.Errorf("user: %w", err)
-	}
-
-	row = ss.DB.QueryRow(`
-	SELECT email, password_hash
-	FROM users WHERE id = $1;
-	`, user.ID)
-	err = row.Scan(&user.Email, &user.PasswordHash)
+	SELECT u.email, u.password_hash 
+	FROM sessions s
+	INNER JOIN users u ON s.user_id = u.id
+	WHERE s.token_hash = $1;
+	`, tokenHash)
+	err := row.Scan(&user.Email, &user.PasswordHash)
 	if err != nil {
 		return nil, fmt.Errorf("user: %w", err)
 	}

@@ -95,3 +95,19 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	setCookie(w, CookieSession, session.Token)
 	http.Redirect(w, r, "/currentuser", http.StatusFound)
 }
+
+func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
+	token, err := readCookie(r, CookieSession)
+	if err != nil {
+		http.Redirect(w, r, "/signin", http.StatusFound)
+		return
+	}
+
+	err = u.SessionService.DeleteSession(token)
+	if err != nil {
+		fmt.Errorf("delete session %w", err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+	}
+	deleteCookie(w, CookieSession)
+	http.Redirect(w, r, "/signin", http.StatusFound)
+}
