@@ -42,6 +42,7 @@ func ParseFS(fs fs.FS, pattern ...string) (Template, error) {
 }
 
 func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}) {
+	// clone the template instead of using the same one every time to prevent data races
 	tpl, err := t.HtmlTpl.Clone()
 	if err != nil {
 		log.Printf("cloning template: %v", err)
