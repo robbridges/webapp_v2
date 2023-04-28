@@ -38,6 +38,7 @@ func main() {
 	healthTpl := views.Must(views.ParseFS(templates.FS, "healthcheck.gohtml", "tailwind.gohtml"))
 	signupTpl := views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
 	signInTpl := views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
+	currentUserTpl := views.Must(views.ParseFS(templates.FS, "currentuser.gohtml", "tailwind.gohtml"))
 
 	cfg := models.DefaultPostgresConfig()
 	db, err := models.Open(cfg)
@@ -60,6 +61,8 @@ func main() {
 	}
 	usersC.Templates.New = signupTpl
 	usersC.Templates.SignIn = signInTpl
+	usersC.Templates.CurrentUser = currentUserTpl
+
 	csrfKey := rand.GenerateRandByteSlice()
 	csrfMw := csrf.Protect(csrfKey, csrf.Secure(false))
 	svr := http.Server{
