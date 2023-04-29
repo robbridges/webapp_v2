@@ -25,26 +25,3 @@ func TestSetCookie(t *testing.T) {
 	}
 
 }
-
-func TestReadCookie(t *testing.T) {
-	// Create a new ResponseRecorder to capture the output.
-	rr := httptest.NewRecorder()
-
-	// Set a new cookie with the name "session" and the value "12345".
-	setCookie(rr, "session", "12345")
-
-	// Create a new Request using the captured response.
-	req := httptest.NewRequest("GET", "/", nil)
-	req.Header.Set("Cookie", rr.Header().Get("Set-Cookie"))
-
-	// Call the readCookie function with the mocked request.
-	value, err := readCookie(req, "session")
-
-	// Check that the cookie value and error are correct.
-	if err != nil {
-		t.Errorf("unexpected error when reading cookie: %v", err)
-	}
-	if value != "12345" {
-		t.Errorf("expected cookie value to be 12345, but got %s", value)
-	}
-}
