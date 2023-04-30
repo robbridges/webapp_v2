@@ -18,9 +18,6 @@ type Session struct {
 
 type SessionService struct {
 	DB *sql.DB
-	// BytesPerToken is used to determine how many bytes to use when generating each session token If this value is
-	// under MinBytes Per Token it will be ignored and MinBytesPerToken will be used. MinBytsPerToken will also be used
-	// if this value is not set. Just a bit future proofing
 }
 
 // Create will create a new session for the user provided the session token is the returned string to be stored

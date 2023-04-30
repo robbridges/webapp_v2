@@ -20,6 +20,8 @@ func (tm *tokenManager) New() (string, error) {
 		bytesPerToken = MinBytesPerToken
 	}
 
+	fmt.Println("bytes per token ")
+
 	token, err := rand.String(bytesPerToken)
 	if err != nil {
 		return "", fmt.Errorf("create session token: %w", err)
