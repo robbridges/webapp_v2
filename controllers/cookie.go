@@ -27,7 +27,7 @@ func setCookie(w http.ResponseWriter, name, value string) {
 }
 
 func readCookie(r *http.Request, name string) (string, error) {
-	logger := r.Context().Value("logger").(*models.DBLogger)
+	logger := r.Context().Value("logger").(models.LogInterface)
 	c, err := r.Cookie(name)
 	if err != nil {
 		logger.Create(err)

@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+type LogInterface interface {
+	Create(error) error
+}
+
 type Log struct {
 	message   string
 	timeStamp time.Time
@@ -29,17 +33,17 @@ func (logger *DBLogger) Create(err error) error {
 	return nil
 }
 
-func LoggerMiddleware(logger *DBLogger) func(next http.Handler) http.Handler {
+func LoggerMiddleware(loggerInterface LogInterface) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Call the next handler and log any errors that occur
 			defer func() {
 				if err := recover(); err != nil {
-					logger.Create(fmt.Errorf("panic: %v", err))
+					loggerInterface.Create(fmt.Errorf("panic: %v", err))
 					http.Error(w, "Internal server error", http.StatusInternalServerError)
 				}
 			}()
-			ctx := context.WithValue(r.Context(), "logger", logger)
+			ctx := context.WithValue(r.Context(), "logger", loggerInterface)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

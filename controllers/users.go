@@ -36,7 +36,7 @@ func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
-	logger := r.Context().Value("logger").(*models.DBLogger)
+	logger := r.Context().Value("logger").(models.LogInterface)
 	var data struct {
 		Email    string
 		Password string
@@ -65,7 +65,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	logger := r.Context().Value("logger").(*models.DBLogger)
+	logger := r.Context().Value("logger").(models.LogInterface)
 	tokenCookie, err := readCookie(r, CookieSession)
 	if err != nil {
 		logger.Create(err)
@@ -90,7 +90,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
-	logger := r.Context().Value("logger").(*models.DBLogger)
+	logger := r.Context().Value("logger").(models.LogInterface)
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	user, err := u.UserService.Create(email, password)
@@ -113,7 +113,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
-	logger := r.Context().Value("logger").(*models.DBLogger)
+	logger := r.Context().Value("logger").(models.LogInterface)
 	token, err := readCookie(r, CookieSession)
 	if err != nil {
 		logger.Create(err)
