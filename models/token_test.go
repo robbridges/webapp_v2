@@ -1,6 +1,8 @@
 package models
 
 import (
+	"bytes"
+	"crypto/rand"
 	"encoding/base64"
 	"fmt"
 	"testing"
@@ -57,6 +59,27 @@ func TestTokenManager_New(t *testing.T) {
 			t.Errorf("Got %d: wanted %d", got, want)
 		}
 	})
+}
+
+func TestNewTokenWithError(t *testing.T) {
+	tm := &tokenManager{
+		BytesPerToken: 16,
+	}
+
+	mockReader := &bytes.Reader{}
+	randReader := rand.Reader
+	rand.Reader = mockReader
+	defer func() {
+		rand.Reader = randReader
+	}()
+
+	_, err := tm.New()
+	if err == nil {
+		t.Error("Expected an error, but got nil")
+	}
+	if err.Error() != "create session token: string: bytes: EOF" {
+		t.Errorf("Expected error create session token: string: bytes: EOF, but got %v", err)
+	}
 }
 
 func setTokenManager(bytes int) *tokenManager {

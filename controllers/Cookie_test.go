@@ -35,29 +35,50 @@ func TestSetCookie(t *testing.T) {
 }
 
 func TestReadCookie(t *testing.T) {
-	rr := httptest.NewRecorder()
+	t.Run("Read cookie exists", func(t *testing.T) {
+		rr := httptest.NewRecorder()
+		setCookie(rr, "session", "12345")
 
-	setCookie(rr, "session", "12345")
+		// Create a new Request using the captured response.
+		req := httptest.NewRequest("GET", "/", nil)
+		req.Header.Set("Cookie", rr.Header().Get("Set-Cookie"))
 
-	// Create a new Request using the captured response.
-	req := httptest.NewRequest("GET", "/", nil)
-	req.Header.Set("Cookie", rr.Header().Get("Set-Cookie"))
+		// Initialize a mock DBLogger and add it to the request context.
+		logger := &mockLogger{}
+		ctx := context.WithValue(req.Context(), "logger", logger)
+		req = req.WithContext(ctx)
 
-	// Initialize a mock DBLogger and add it to the request context.
-	logger := &mockLogger{}
-	ctx := context.WithValue(req.Context(), "logger", logger)
-	req = req.WithContext(ctx)
+		// Call the readCookie function with the mocked request.
+		value, err := readCookie(req, "session")
 
-	// Call the readCookie function with the mocked request.
-	value, err := readCookie(req, "session")
+		// Check that the cookie value and error are correct.
+		if err != nil {
+			t.Errorf("unexpected error when reading cookie: %v", err)
+		}
+		if value != "12345" {
+			t.Errorf("expected cookie value to be 12345, but got %s", value)
+		}
+	})
+	t.Run("Read cookie doesn't exist", func(t *testing.T) {
+		rr := httptest.NewRecorder()
 
-	// Check that the cookie value and error are correct.
-	if err != nil {
-		t.Errorf("unexpected error when reading cookie: %v", err)
-	}
-	if value != "12345" {
-		t.Errorf("expected cookie value to be 12345, but got %s", value)
-	}
+		// Create a new Request using the captured response.
+		req := httptest.NewRequest("GET", "/", nil)
+		req.Header.Set("Cookie", rr.Header().Get("Set-Cookie"))
+
+		// Initialize a mock DBLogger and add it to the request context.
+		logger := &mockLogger{}
+		ctx := context.WithValue(req.Context(), "logger", logger)
+		req = req.WithContext(ctx)
+
+		// Call the readCookie function with the mocked request.
+		_, err := readCookie(req, "session")
+
+		// Check that the cookie value and error are correct.
+		if err == nil {
+			t.Error("error expected when reading cookie, got nil")
+		}
+	})
 
 }
 
