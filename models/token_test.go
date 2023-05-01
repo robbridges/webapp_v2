@@ -66,6 +66,8 @@ func setTokenManager(bytes int) *tokenManager {
 	return tm
 }
 
+// DecodeStr decodes the str from base 64 encoding, since our rand package generates a random string and encodes it in
+// base 64 we need to decode it to check the length of the str in our tests.
 func decodeStr(tm *tokenManager) (string, error) {
 	tokenStr, err := tm.New()
 	if err != nil {
