@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"net/http/httptest"
 	"testing"
 )
@@ -34,10 +35,8 @@ func TestSetCookie(t *testing.T) {
 }
 
 func TestReadCookie(t *testing.T) {
-	// Create a new ResponseRecorder to capture the output.
 	rr := httptest.NewRecorder()
 
-	// Set a new cookie with the name "session" and the value "12345".
 	setCookie(rr, "session", "12345")
 
 	// Create a new Request using the captured response.
@@ -60,4 +59,46 @@ func TestReadCookie(t *testing.T) {
 		t.Errorf("expected cookie value to be 12345, but got %s", value)
 	}
 
+}
+
+func TestSetCookieAndDeleteCookie(t *testing.T) {
+	// Create a mock response writer
+	mockResponseWriter := httptest.NewRecorder()
+
+	// Call the function to set a cookie
+	cookieName := "myCookie"
+	cookieValue := "myCookieValue"
+	newCookie(cookieName, cookieValue)
+	setCookie(mockResponseWriter, cookieName, cookieValue)
+
+	// Check that the Set-Cookie header was set correctly
+	resultingHeaders := mockResponseWriter.Header()
+	setCookieHeaderValues, ok := resultingHeaders["Set-Cookie"]
+	if !ok {
+		t.Error("Expected Set-Cookie header to be set")
+	} else if len(setCookieHeaderValues) != 1 {
+		t.Errorf("Expected 1 Set-Cookie header value, got %d", len(setCookieHeaderValues))
+	} else {
+		expectedHeaderValue := fmt.Sprintf("%s=%s; Path=/; HttpOnly", cookieName, cookieValue)
+		if setCookieHeaderValues[0] != expectedHeaderValue {
+			t.Errorf("Expected Set-Cookie header value to be %q, got %q", expectedHeaderValue, setCookieHeaderValues[0])
+		}
+	}
+
+	// Call the function to delete the cookie
+	deleteCookie(mockResponseWriter, cookieName)
+
+	// Check that the Set-Cookie header was set correctly
+	resultingHeaders = mockResponseWriter.Header()
+	setCookieHeaderValues, ok = resultingHeaders["Set-Cookie"]
+	if !ok {
+		t.Error("Expected Set-Cookie header to be set")
+	} else if len(setCookieHeaderValues) != 2 {
+		t.Errorf("Expected 1 Set-Cookie header value, got %d", len(setCookieHeaderValues))
+	} else {
+		expectedHeaderValue := fmt.Sprintf("%s=myCookieValue; Path=/; HttpOnly", cookieName)
+		if setCookieHeaderValues[0] != expectedHeaderValue {
+			t.Errorf("Expected Set-Cookie header value to be %q, got %q", expectedHeaderValue, setCookieHeaderValues[0])
+		}
+	}
 }
