@@ -38,7 +38,7 @@ func (ss *SessionService) Create(userID int) (*Session, error) {
 	session := Session{
 		UserID:    userID,
 		Token:     token,
-		TokenHash: ss.hash(token),
+		TokenHash: hash(token),
 	}
 	row := ss.DB.QueryRow(`
 		UPDATE sessions
@@ -65,7 +65,7 @@ func (ss *SessionService) Create(userID int) (*Session, error) {
 }
 
 func (ss *SessionService) User(token string) (*User, error) {
-	tokenHash := ss.hash(token)
+	tokenHash := hash(token)
 	var user User
 	row := ss.DB.QueryRow(`
 	SELECT u.email, u.password_hash 
@@ -80,7 +80,7 @@ func (ss *SessionService) User(token string) (*User, error) {
 }
 
 func (ss *SessionService) DeleteSession(token string) error {
-	tokenHash := ss.hash(token)
+	tokenHash := hash(token)
 	_, err := ss.DB.Exec(`
 	DELETE FROM sessions 
 	WHERE token_hash = $1
@@ -91,15 +91,46 @@ func (ss *SessionService) DeleteSession(token string) error {
 	return nil
 }
 
-func (ss *SessionService) hash(token string) string {
+func hash(token string) string {
 	tokenHash := sha256.Sum256([]byte(token))
 	return base64.URLEncoding.EncodeToString(tokenHash[:])
 }
 
 func (mss *MockSessionService) Create(userID int) (*Session, error) {
-	return nil, nil
+	tokenManager := tokenManager{
+		BytesPerToken: 32,
+	}
+	token, err := tokenManager.New()
+	if err != nil {
+		return nil, fmt.Errorf("create error: %w", err)
+	}
+	session := Session{
+		UserID:    userID,
+		Token:     token,
+		TokenHash: hash(token),
+	}
+	return &session, nil
 }
 
 func (mss *MockSessionService) User(token string) (*User, error) {
-	return nil, nil
+	hashed := hash(token)
+
+	if token == "valid_token" {
+		user := User{
+			ID:           1,
+			Email:        "found@user.com",
+			PasswordHash: hashed,
+		}
+		return &user, nil
+	}
+
+	return nil, fmt.Errorf("no user found by token")
+}
+
+func (mss *MockSessionService) DeleteSession(token string) error {
+	if token == "found token" {
+		return nil
+	}
+	return fmt.Errorf("this token was not found")
+
 }
