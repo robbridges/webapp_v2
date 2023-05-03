@@ -15,14 +15,6 @@ func (r *errorReader) Read(p []byte) (int, error) {
 	return 0, errors.New("mocked error")
 }
 
-type mockReader struct{}
-
-func (m *mockReader) Read(p []byte) (int, error) {
-	// simulate the behavior of rand.Read()
-	copy(p, []byte{0x01, 0x02, 0x03, 0x04, 0x05})
-	return len(p), nil
-}
-
 func isString(v interface{}) bool {
 	_, ok := v.(string)
 	return ok
