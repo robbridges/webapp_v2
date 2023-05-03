@@ -13,7 +13,7 @@ type Users struct {
 		CurrentUser Template
 	}
 	UserService    models.UserServiceInterface
-	SessionService *models.SessionService
+	SessionService models.SessionServiceInterface
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {

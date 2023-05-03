@@ -7,6 +7,12 @@ import (
 	"fmt"
 )
 
+type SessionServiceInterface interface {
+	Create(userID int) (*Session, error)
+	User(token string) (*User, error)
+	DeleteSession(token string) error
+}
+
 type Session struct {
 	ID     int
 	UserID int
@@ -19,6 +25,8 @@ type Session struct {
 type SessionService struct {
 	DB *sql.DB
 }
+
+type MockSessionService struct{}
 
 // Create will create a new session for the user provided the session token is the returned string to be stored
 // in our Postgres user table
@@ -86,4 +94,12 @@ func (ss *SessionService) DeleteSession(token string) error {
 func (ss *SessionService) hash(token string) string {
 	tokenHash := sha256.Sum256([]byte(token))
 	return base64.URLEncoding.EncodeToString(tokenHash[:])
+}
+
+func (mss *MockSessionService) Create(userID int) (*Session, error) {
+	return nil, nil
+}
+
+func (mss *MockSessionService) User(token string) (*User, error) {
+	return nil, nil
 }
