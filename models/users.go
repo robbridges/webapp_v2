@@ -76,11 +76,16 @@ func (mui *MockUserService) Create(email, password string) (*User, error) {
 func (mus *MockUserService) Authenticate(email, password string) (*User, error) {
 	email = strings.ToLower(email)
 	user := User{
+		ID:           123,
 		Email:        email,
 		PasswordHash: password,
 	}
 
-	return &user, nil
+	if password == "secure" {
+		return &user, nil
+	}
+
+	return nil, fmt.Errorf("invalid email or password")
 }
 
 func (us *UserService) Authenticate(email, password string) (*User, error) {
