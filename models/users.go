@@ -82,7 +82,7 @@ func (us *UserService) InsertUser(user *User) error {
 	return nil
 }
 
-func (mui *MockUserService) Create(email, password string) (*User, error) {
+func (mus *MockUserService) Create(email, password string) (*User, error) {
 	email = strings.ToLower(email)
 
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
