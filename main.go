@@ -23,13 +23,17 @@ func init() {
 	}
 }
 
+type App struct {
+	AppUserService    models.UserServiceInterface
+	AppSessionService *models.SessionService // Use an interface if needed
+	// Add other dependencies or configurations as needed
+}
+
 func notFound(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprintf(w, "<p> Oh no, nothing's here..")
 }
-
-var logger *models.DBLogger // Declare logger as a global variable
 
 func main() {
 	r := chi.NewRouter()
@@ -58,7 +62,7 @@ func main() {
 		DB: db,
 	}
 
-	logger = &models.DBLogger{
+	logger := &models.DBLogger{
 		DB: db,
 	}
 
@@ -66,6 +70,7 @@ func main() {
 		UserService:    &userService,
 		SessionService: &sessionService,
 	}
+
 	usersC.Templates.New = signupTpl
 	usersC.Templates.SignIn = signInTpl
 	usersC.Templates.CurrentUser = currentUserTpl

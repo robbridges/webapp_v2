@@ -3,6 +3,7 @@ module github.com/robbridges/webapp_v2
 go 1.20
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-chi/chi/v5 v5.0.8 // indirect
 	github.com/gorilla/csrf v1.7.1 // indirect
