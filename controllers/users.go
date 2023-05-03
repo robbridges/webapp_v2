@@ -12,7 +12,7 @@ type Users struct {
 		SignIn      Template
 		CurrentUser Template
 	}
-	UserService    *models.UserService
+	UserService    models.UserServiceInterface
 	SessionService *models.SessionService
 }
 

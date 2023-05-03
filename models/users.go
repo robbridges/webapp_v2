@@ -9,9 +9,10 @@ import (
 
 type UserServiceInterface interface {
 	Create(email, password string) (*User, error)
+	Authenticate(email, password string) (*User, error)
 }
 
-type MockUserInterface struct{}
+type MockUserService struct{}
 
 type User struct {
 	ID           int
@@ -55,7 +56,7 @@ func (us *UserService) InsertUser(user *User) error {
 	return nil
 }
 
-func (mui *MockUserInterface) Create(email, password string) (*User, error) {
+func (mui *MockUserService) Create(email, password string) (*User, error) {
 	email = strings.ToLower(email)
 
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -67,6 +68,16 @@ func (mui *MockUserInterface) Create(email, password string) (*User, error) {
 	user := User{
 		Email:        email,
 		PasswordHash: passwordHash,
+	}
+
+	return &user, nil
+}
+
+func (mus *MockUserService) Authenticate(email, password string) (*User, error) {
+	email = strings.ToLower(email)
+	user := User{
+		Email:        email,
+		PasswordHash: password,
 	}
 
 	return &user, nil
