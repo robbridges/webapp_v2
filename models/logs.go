@@ -21,6 +21,10 @@ type DBLogger struct {
 	DB *sql.DB
 }
 
+type MockLogger struct {
+	errorLog []error
+}
+
 func (logger *DBLogger) Create(err error) error {
 	errorTime := time.Now()
 	_, logError := logger.DB.Exec(`
@@ -30,6 +34,11 @@ func (logger *DBLogger) Create(err error) error {
 	if logError != nil {
 		return logError
 	}
+	return nil
+}
+
+func (ml *MockLogger) Create(err error) error {
+	ml.errorLog = append(ml.errorLog, err)
 	return nil
 }
 
