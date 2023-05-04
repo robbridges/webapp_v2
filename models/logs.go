@@ -36,7 +36,6 @@ func (logger *DBLogger) Create(err error) error {
 func LoggerMiddleware(loggerInterface LogInterface) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Call the next handler and log any errors that occur
 			defer func() {
 				if err := recover(); err != nil {
 					loggerInterface.Create(fmt.Errorf("panic: %v", err))
