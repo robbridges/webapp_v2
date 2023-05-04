@@ -23,12 +23,6 @@ func init() {
 	}
 }
 
-type App struct {
-	AppUserService    models.UserServiceInterface
-	AppSessionService *models.SessionService // Use an interface if needed
-	// Add other dependencies or configurations as needed
-}
-
 func notFound(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusNotFound)

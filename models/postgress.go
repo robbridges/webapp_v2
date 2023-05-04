@@ -7,6 +7,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+type PostgressConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Database string
+	SSLMODE  string
+}
+
 // Open will open a sql connection with the provided Postgres. Callers will need to ensure it's closed
 func Open(config PostgressConfig) (*sql.DB, error) {
 	db, err := sql.Open(
@@ -30,13 +39,8 @@ func DefaultPostgresConfig() PostgressConfig {
 	}
 }
 
-type PostgressConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	Database string
-	SSLMODE  string
+func DefaultPostgesTestConfig() PostgressConfig {
+	return PostgressConfig{}
 }
 
 func (cfg PostgressConfig) String() string {
