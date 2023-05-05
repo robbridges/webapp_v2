@@ -2,84 +2,63 @@ package models
 
 import (
 	"errors"
-	"reflect"
 	"testing"
 )
 
-func TestCreateSession_Success(t *testing.T) {
-	mockSessionService := MockSessionService{}
+func TestMockSessionService_Create(t *testing.T) {
+	mockSession := &Session{UserID: 123, Token: "abc123"}
 
-	userID := 123
-	session, err := mockSessionService.Create(userID)
+	// create a new mock session service
+	mockSessionService := &MockSessionService{}
 
-	if session == nil {
-		t.Errorf("Expected session object, got nil")
+	// set the mock Create function to return a session
+	mockSessionService.CreateFunc = func(userID int) (*Session, error) {
+		return mockSession, nil
 	}
 
+	// call the Create method on the mock session service
+	session, err := mockSessionService.Create(123)
+
+	// check if the returned session matches the expected session
+	if session != mockSession {
+		t.Errorf("session does not match the expected session")
+	}
+
+	// check if the error is nil
 	if err != nil {
-		t.Errorf("Expected error to be nil, got %v", err)
-	}
-
-	if session.UserID != userID {
-		t.Errorf("Expected session user ID to be %d, got %d", userID, session.UserID)
-	}
-
-	if session.Token == "" {
-		t.Errorf("Expected session token to be non-empty, got empty string")
-	}
-
-	if session.TokenHash == "" {
-		t.Errorf("Expected session token hash to be non-empty, got empty string")
+		t.Errorf("unexpected error: %v", err)
 	}
 }
 
 func TestMockSessionService_User(t *testing.T) {
-	expectedUser := &User{
-		ID:           1,
-		Email:        "found@user.com",
-		PasswordHash: hash("valid_token"),
+	// Set up mock user
+	expectedUser := &User{ID: 1, Email: "test@test.com"}
+
+	// Set up mock session service
+	mockSessionService := &MockSessionService{}
+
+	// Test case 1: UserFunc is not set
+	user, err := mockSessionService.User("abc123")
+	if user != nil || err == nil {
+		t.Errorf("unexpected result: user=%v, err=%v", user, err)
 	}
 
-	// While I'm not certain this will ever get big enough to need table tests, it's easier to do it now then have to
-	// later
-	testCases := []struct {
-		name             string
-		token            string
-		expectedUser     *User
-		expectedError    error
-		expectedErrorMsg string
-	}{
-		{
-			name:             "User exists",
-			token:            "valid_token",
-			expectedUser:     expectedUser,
-			expectedError:    nil,
-			expectedErrorMsg: "",
-		},
-		{
-			name:             "User does not exist",
-			token:            "invalid_token",
-			expectedUser:     nil,
-			expectedError:    errors.New("no user found by token"),
-			expectedErrorMsg: "no user found by token",
-		},
+	// Test case 2: UserFunc is set
+	mockSessionService.UserFunc = func(token string) (*User, error) {
+		if token == "abc123" {
+			return expectedUser, nil
+		}
+		return nil, errors.New("invalid token")
+	}
+	user, err = mockSessionService.User("abc123")
+	if user != expectedUser || err != nil {
+		t.Errorf("unexpected result: user=%v, err=%v", user, err)
 	}
 
-	// Loop over each test case and run the test
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			// Call the User method of the mock service with the test token
-			mockService := MockSessionService{}
-			user, err := mockService.User(tc.token)
-
-			// Assert that the returned user object and error match the expected values
-			if !reflect.DeepEqual(user, tc.expectedUser) {
-				t.Errorf("Expected user to be %v, but got %v", tc.expectedUser, user)
-			}
-			if err != nil && err.Error() != tc.expectedErrorMsg {
-				t.Errorf("Expected error message to be '%s', but got '%s'", tc.expectedErrorMsg, err.Error())
-			}
-		})
+	// Test case 3: Invalid token
+	user, err = mockSessionService.User("invalid_token")
+	if user != nil || err == nil {
+		t.Errorf("unexpected result: user=%v, err=%v", user, err)
 	}
 }
 

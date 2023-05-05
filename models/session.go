@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base64"
+	"errors"
 	"fmt"
 )
 
@@ -26,7 +27,10 @@ type SessionService struct {
 	DB *sql.DB
 }
 
-type MockSessionService struct{}
+type MockSessionService struct {
+	CreateFunc func(userID int) (*Session, error)
+	UserFunc   func(token string) (*User, error)
+}
 
 // Create will create a new session for the user provided the session token is the returned string to be stored
 // in our Postgres user table
@@ -96,35 +100,18 @@ func hash(token string) string {
 	return base64.URLEncoding.EncodeToString(tokenHash[:])
 }
 
-func (mss *MockSessionService) Create(userID int) (*Session, error) {
-	tokenManager := tokenManager{
-		BytesPerToken: 32,
+func (m *MockSessionService) Create(userID int) (*Session, error) {
+	if m.CreateFunc != nil {
+		return m.CreateFunc(userID)
 	}
-	token, err := tokenManager.New()
-	if err != nil {
-		return nil, fmt.Errorf("create error: %w", err)
-	}
-	session := Session{
-		UserID:    userID,
-		Token:     token,
-		TokenHash: hash(token),
-	}
-	return &session, nil
+	return nil, errors.New("not implemented")
 }
 
-func (mss *MockSessionService) User(token string) (*User, error) {
-	hashed := hash(token)
-
-	if token == "valid_token" {
-		user := User{
-			ID:           1,
-			Email:        "found@user.com",
-			PasswordHash: hashed,
-		}
-		return &user, nil
+func (m *MockSessionService) User(token string) (*User, error) {
+	if m.UserFunc != nil {
+		return m.UserFunc(token)
 	}
-
-	return nil, fmt.Errorf("no user found by token")
+	return nil, errors.New("not implemented")
 }
 
 func (mss *MockSessionService) DeleteSession(token string) error {

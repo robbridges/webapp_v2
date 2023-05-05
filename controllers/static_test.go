@@ -7,14 +7,6 @@ import (
 	"testing"
 )
 
-type MockTemplate struct {
-	ExecuteFunc func(w http.ResponseWriter, r *http.Request, data interface{})
-}
-
-func (mt *MockTemplate) Execute(w http.ResponseWriter, r *http.Request, data interface{}) {
-	mt.ExecuteFunc(w, r, data)
-}
-
 func TestStaticHandler(t *testing.T) {
 	mockTmpl := &MockTemplate{
 		ExecuteFunc: func(w http.ResponseWriter, r *http.Request, data interface{}) {

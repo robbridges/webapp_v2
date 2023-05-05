@@ -22,7 +22,7 @@ type DBLogger struct {
 }
 
 type MockLogger struct {
-	errorLog []error
+	ErrorLog []error
 }
 
 func (logger *DBLogger) Create(err error) error {
@@ -38,7 +38,7 @@ func (logger *DBLogger) Create(err error) error {
 }
 
 func (ml *MockLogger) Create(err error) error {
-	ml.errorLog = append(ml.errorLog, err)
+	ml.ErrorLog = append(ml.ErrorLog, err)
 	return nil
 }
 

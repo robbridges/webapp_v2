@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
@@ -40,32 +41,34 @@ func TestMockUserService_Create(t *testing.T) {
 }
 
 func TestMockUserService_Authenticate(t *testing.T) {
-	t.Run("Mock Authentication happy path", func(t *testing.T) {
-		email := "test@admin.com"
-		password := "secure"
-		mus := MockUserService{}
-		user, err := mus.Authenticate(email, password)
-		if err != nil {
-			t.Errorf("User password %s, should have returned user it returned an error", password)
-		}
+	email := "test@test.com"
+	password := "password"
 
-		if user.Email != email {
-			t.Errorf("User did not get assigned the correct details")
+	// Set up mock user service
+	mockUserService := &MockUserService{}
+
+	// Test case 1: AuthenticateFunc is not set
+	user, err := mockUserService.Authenticate(email, password)
+	if user != nil || err == nil {
+		t.Errorf("unexpected result: user=%v, err=%v", user, err)
+	}
+
+	// Test case 2: AuthenticateFunc is set
+	expectedUser := &User{ID: 1, Email: email}
+	mockUserService.AuthenticateFunc = func(email, password string) (*User, error) {
+		if password == "password" {
+			return expectedUser, nil
 		}
-	})
-	t.Run("Mock Authentication, sad path", func(t *testing.T) {
-		mockErrorMessage := "invalid email or password"
-		email := "test@admin.com"
-		password := "fake"
-		mus := MockUserService{}
-		_, err := mus.Authenticate(email, password)
-		if err == nil {
-			t.Errorf("User password %s, should have returned error, it did not", password)
-		}
-		got := err.Error()
-		want := mockErrorMessage
-		if got != want {
-			t.Errorf("The wrong error was returned we got %s, but wanted %s", got, want)
-		}
-	})
+		return nil, errors.New("invalid credentials")
+	}
+	user, err = mockUserService.Authenticate(email, password)
+	if user != expectedUser || err != nil {
+		t.Errorf("unexpected result: user=%v, err=%v", user, err)
+	}
+
+	// Test case 3: Invalid credentials
+	user, err = mockUserService.Authenticate(email, "wrongpassword")
+	if user != nil || err == nil {
+		t.Errorf("unexpected result: user=%v, err=%v", user, err)
+	}
 }

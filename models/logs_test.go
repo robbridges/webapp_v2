@@ -9,7 +9,7 @@ import (
 
 func TestMockLogger_Create(t *testing.T) {
 	ml := &MockLogger{
-		errorLog: []error{errors.New("first error"), errors.New("second error")},
+		ErrorLog: []error{errors.New("first error"), errors.New("second error")},
 	}
 
 	newError := errors.New("third error to add")
@@ -17,7 +17,7 @@ func TestMockLogger_Create(t *testing.T) {
 		t.Errorf("Mock logger returned error")
 	}
 
-	errorTable := ml.errorLog
+	errorTable := ml.ErrorLog
 	got := len(errorTable)
 	want := 3
 	if got != want {
@@ -33,7 +33,7 @@ func TestMockLogger_Create(t *testing.T) {
 
 func TestLoggerMiddleware(t *testing.T) {
 	mockLogger := &MockLogger{
-		errorLog: []error{},
+		ErrorLog: []error{},
 	}
 	handlerFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	loggerMiddleware := LoggerMiddleware(mockLogger)(handlerFunc)
@@ -43,8 +43,8 @@ func TestLoggerMiddleware(t *testing.T) {
 
 	loggerMiddleware.ServeHTTP(rr, req)
 
-	if len(mockLogger.errorLog) != 0 {
-		t.Errorf("Unexpected error log length: %d", len(mockLogger.errorLog))
+	if len(mockLogger.ErrorLog) != 0 {
+		t.Errorf("Unexpected error log length: %d", len(mockLogger.ErrorLog))
 	}
 
 	// Test panic handling
@@ -58,7 +58,7 @@ func TestLoggerMiddleware(t *testing.T) {
 
 	loggerMiddleware.ServeHTTP(rr, req)
 
-	if len(mockLogger.errorLog) != 1 {
-		t.Errorf("Expected error log length: 1, but got %d", len(mockLogger.errorLog))
+	if len(mockLogger.ErrorLog) != 1 {
+		t.Errorf("Expected error log length: 1, but got %d", len(mockLogger.ErrorLog))
 	}
 }

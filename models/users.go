@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
@@ -12,7 +13,9 @@ type UserServiceInterface interface {
 	Authenticate(email, password string) (*User, error)
 }
 
-type MockUserService struct{}
+type MockUserService struct {
+	AuthenticateFunc func(email, password string) (*User, error)
+}
 
 type User struct {
 	ID           int
@@ -99,17 +102,9 @@ func (mus *MockUserService) Create(email, password string) (*User, error) {
 	return &user, nil
 }
 
-func (mus *MockUserService) Authenticate(email, password string) (*User, error) {
-	email = strings.ToLower(email)
-	user := User{
-		ID:           123,
-		Email:        email,
-		PasswordHash: password,
+func (m *MockUserService) Authenticate(email, password string) (*User, error) {
+	if m.AuthenticateFunc != nil {
+		return m.AuthenticateFunc(email, password)
 	}
-
-	if password == "secure" {
-		return &user, nil
-	}
-
-	return nil, fmt.Errorf("invalid email or password")
+	return nil, errors.New("AuthenticateFunc is not set")
 }
