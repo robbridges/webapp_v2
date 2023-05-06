@@ -249,5 +249,144 @@ func TestUsers_ProcessSignIn(t *testing.T) {
 			t.Errorf("cookie not deleted: got no cookie")
 		}
 	})
+}
 
+func TestUsers_CurrentUser(t *testing.T) {
+	mockLogger := &models.MockLogger{}
+
+	mockSessionService := &models.MockSessionService{}
+	mockUserService := &models.MockUserService{}
+
+	user := &models.User{
+		ID:    1,
+		Email: "test@test.com",
+	}
+
+	mockUserService.AuthenticateFunc = func(email string, password string) (*models.User, error) {
+		if password == "secure" {
+			return user, nil
+		} else {
+			return nil, errors.New("invalid credentials")
+		}
+	}
+	mockSessionService.UserFunc = func(token string) (*models.User, error) {
+		if token == "valid_token" {
+			return user, nil
+		} else {
+			return nil, errors.New("session read error")
+		}
+	}
+
+	session := &models.Session{UserID: user.ID, Token: "abc123"}
+	mockSessionService.CreateFunc = func(userID int) (*models.Session, error) {
+		return session, nil
+	}
+
+	users := Users{
+		Templates: struct {
+			New         Template
+			SignIn      Template
+			CurrentUser Template
+		}{},
+		UserService:    mockUserService,
+		SessionService: mockSessionService,
+	}
+
+	t.Run("happy path", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r, _ := http.NewRequest("POST", "/signin", nil)
+
+		cookie := &http.Cookie{
+			Name:  CookieSession,
+			Value: "test_cookie_value",
+		}
+		r.AddCookie(cookie)
+
+		email := "test@test.com"
+		password := "secure"
+
+		// Wrap the handler with the logger middleware
+		handler := models.LoggerMiddleware(mockLogger)(http.HandlerFunc(users.ProcessSignIn))
+
+		// Add logger to the request context
+		ctx := context.WithValue(r.Context(), "logger", mockLogger)
+		r = r.WithContext(ctx)
+
+		// Set form values
+		data := url.Values{}
+		data.Set("email", email)
+		data.Set("password", password)
+		r.PostForm = data
+
+		// Call the wrapped handler
+		handler.ServeHTTP(w, r)
+
+		// Assert response
+		if w.Code != http.StatusFound {
+			t.Errorf("unexpected status code: got %v, want %v", w.Code, http.StatusFound)
+		}
+
+		setCookie(w, CookieSession, session.Token)
+
+		// Call readCookie to read the "session" cookie value
+		value, err := readCookie(r, CookieSession)
+
+		// Check if the value and error are as expected
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if value != "test_cookie_value" {
+			t.Errorf("unexpected cookie value: got %v, want %v", value, "test_cookie_value")
+		}
+
+		if len(mockLogger.ErrorLog) > 0 {
+			t.Errorf("unexpected error logged: %v", mockLogger.ErrorLog[0])
+		}
+	})
+
+	t.Run("invalid session", func(t *testing.T) {
+		mockLogger := &models.MockLogger{}
+		w := httptest.NewRecorder()
+		r, _ := http.NewRequest("GET", "/current_user", nil)
+
+		// Wrap the handler with the logger middleware
+		handler := models.LoggerMiddleware(mockLogger)(http.HandlerFunc(users.CurrentUser))
+
+		// Add logger to the request context
+		ctx := context.WithValue(r.Context(), "logger", mockLogger)
+		r = r.WithContext(ctx)
+
+		// Set session cookie
+		setCookie(w, CookieSession, "invalid session")
+
+		// Call the wrapped handler
+		handler.ServeHTTP(w, r)
+
+		// Assert response
+		if w.Code != http.StatusFound {
+			t.Errorf("unexpected status code: got %v, want %v", w.Code, http.StatusFound)
+		}
+
+		// Assert no user was returned
+		userID, ok := r.Context().Value("userID").(int)
+		if ok {
+			t.Errorf("unexpected userID in request context: got %v, want nil", userID)
+		}
+
+		// Assert error was logged
+		if len(mockLogger.ErrorLog) != 2 {
+			t.Fatalf("unexpected number of errors logged: got %v, want 1", len(mockLogger.ErrorLog))
+		}
+		err := mockLogger.ErrorLog[0].Error()
+		expectedErr := "http: named cookie not present"
+		if !strings.Contains(err, expectedErr) {
+			t.Errorf("unexpected error message: got %v, want %v", err, expectedErr)
+		}
+
+		// Assert cookie was deleted
+		cookies := r.Cookies()
+		if len(cookies) != 0 {
+			t.Errorf("unexpected number of cookies: got %v, want 0", len(cookies))
+		}
+	})
 }
