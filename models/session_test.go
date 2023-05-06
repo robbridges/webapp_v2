@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -62,34 +63,32 @@ func TestMockSessionService_User(t *testing.T) {
 	}
 }
 
-func TestDeleteSession(t *testing.T) {
-	mockService := &MockSessionService{}
+func TestSessionService_DeleteSession(t *testing.T) {
+	mockSessionService := &MockSessionService{}
 
-	testCases := []struct {
-		name        string
-		token       string
-		expectedErr string
-	}{
-		{
-			name:        "Token found",
-			token:       "found token",
-			expectedErr: "",
-		},
-		{
-			name:        "Token not found",
-			token:       "not found token",
-			expectedErr: "this token was not found",
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			err := mockService.DeleteSession(tc.token)
-			if err == nil && tc.expectedErr != "" {
-				t.Errorf("Expected error '%s', but got no error", tc.expectedErr)
-			} else if err != nil && err.Error() != tc.expectedErr {
-				t.Errorf("Expected error '%s', but got '%s'", tc.expectedErr, err.Error())
+	t.Run("happy path", func(t *testing.T) {
+		mockSessionService.DeleteSessionFunc = func(token string) error {
+			if token == "found token" {
+				return nil
 			}
-		})
-	}
+			return errors.New("token not found")
+		}
+
+		err := mockSessionService.DeleteSession("found token")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("error path", func(t *testing.T) {
+		mockSessionService.DeleteSessionFunc = func(token string) error {
+			return fmt.Errorf("database error")
+		}
+
+		err := mockSessionService.DeleteSession("some token")
+		expectedErr := "database error"
+		if err == nil || err.Error() != expectedErr {
+			t.Errorf("unexpected error: got %v, want %v", err, expectedErr)
+		}
+	})
 }

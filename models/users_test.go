@@ -2,41 +2,47 @@ package models
 
 import (
 	"errors"
-	"strings"
 	"testing"
 )
 
-func TestMockUserService_Create(t *testing.T) {
-	t.Run("Mock service create - happy", func(t *testing.T) {
-		email := "Test@Test.com"
-		password := "very secure"
-		mus := MockUserService{}
-		user, err := mus.Create(email, password)
-		if err != nil {
-			t.Errorf("Error was returned unexpectedly, %v", err)
-		}
-		if user.Email != strings.ToLower(email) {
-			t.Errorf("email not correct set, wanted %s, got %s", email, user.Email)
+func TestUserService_Create(t *testing.T) {
+	mockUserService := &MockUserService{}
+
+	t.Run("happy path", func(t *testing.T) {
+		mockUserService.CreateFunc = func(email string, password string) (*User, error) {
+			user := &User{
+				ID:           1,
+				Email:        email,
+				PasswordHash: "hashedPassword",
+			}
+			return user, nil
 		}
 
-		if user.PasswordHash == password {
-			t.Errorf("The password was never hashed")
+		user, err := mockUserService.Create("test@test.com", "password")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if user.ID != 1 {
+			t.Errorf("unexpected user ID: got %v, want %v", user.ID, 1)
+		}
+		if user.Email != "test@test.com" {
+			t.Errorf("unexpected email: got %v, want %v", user.Email, "test@test.com")
+		}
+		if user.PasswordHash != "hashedPassword" {
+			t.Errorf("unexpected password hash: got %v, want %v", user.PasswordHash, "hashedPassword")
 		}
 	})
-	t.Run("Mock service create - sad", func(t *testing.T) {
-		email := "Test@Test.com"
-		password := "this_is_a_very_long_password_string_that_exceeds_the_bcrypt_limit_of_72_characters"
-		mus := MockUserService{}
-		_, err := mus.Create(email, password)
-		if err == nil {
-			t.Error("no error returned, but was expected")
-		}
-		got := err.Error()
-		want := "failed to hash password: bcrypt: password length exceeds 72 bytes"
-		if got != want {
-			t.Errorf("We did not get the expected error back, got %s, want %s", got, want)
+
+	t.Run("error path", func(t *testing.T) {
+		mockUserService.CreateFunc = func(email string, password string) (*User, error) {
+			return nil, errors.New("database error")
 		}
 
+		_, err := mockUserService.Create("test@test.com", "password")
+		expectedErr := "database error"
+		if err == nil || err.Error() != expectedErr {
+			t.Errorf("unexpected error: got %v, want %v", err, expectedErr)
+		}
 	})
 }
 

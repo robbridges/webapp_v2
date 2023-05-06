@@ -15,6 +15,7 @@ type UserServiceInterface interface {
 
 type MockUserService struct {
 	AuthenticateFunc func(email, password string) (*User, error)
+	CreateFunc       func(email string, password string) (*User, error)
 }
 
 type User struct {
@@ -85,7 +86,10 @@ func (us *UserService) InsertUser(user *User) error {
 	return nil
 }
 
-func (mus *MockUserService) Create(email, password string) (*User, error) {
+func (mus *MockUserService) Create(email string, password string) (*User, error) {
+	if mus.CreateFunc != nil {
+		return mus.CreateFunc(email, password)
+	}
 	email = strings.ToLower(email)
 
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -102,9 +106,9 @@ func (mus *MockUserService) Create(email, password string) (*User, error) {
 	return &user, nil
 }
 
-func (m *MockUserService) Authenticate(email, password string) (*User, error) {
-	if m.AuthenticateFunc != nil {
-		return m.AuthenticateFunc(email, password)
+func (mus *MockUserService) Authenticate(email, password string) (*User, error) {
+	if mus.AuthenticateFunc != nil {
+		return mus.AuthenticateFunc(email, password)
 	}
 	return nil, errors.New("AuthenticateFunc is not set")
 }

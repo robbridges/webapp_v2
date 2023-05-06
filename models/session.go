@@ -28,8 +28,9 @@ type SessionService struct {
 }
 
 type MockSessionService struct {
-	CreateFunc func(userID int) (*Session, error)
-	UserFunc   func(token string) (*User, error)
+	CreateFunc        func(userID int) (*Session, error)
+	UserFunc          func(token string) (*User, error)
+	DeleteSessionFunc func(token string) error
 }
 
 // Create will create a new session for the user provided the session token is the returned string to be stored
@@ -100,24 +101,23 @@ func hash(token string) string {
 	return base64.URLEncoding.EncodeToString(tokenHash[:])
 }
 
-func (m *MockSessionService) Create(userID int) (*Session, error) {
-	if m.CreateFunc != nil {
-		return m.CreateFunc(userID)
+func (mss *MockSessionService) Create(userID int) (*Session, error) {
+	if mss.CreateFunc != nil {
+		return mss.CreateFunc(userID)
 	}
 	return nil, errors.New("not implemented")
 }
 
-func (m *MockSessionService) User(token string) (*User, error) {
-	if m.UserFunc != nil {
-		return m.UserFunc(token)
+func (mss *MockSessionService) User(token string) (*User, error) {
+	if mss.UserFunc != nil {
+		return mss.UserFunc(token)
 	}
 	return nil, errors.New("not implemented")
 }
 
 func (mss *MockSessionService) DeleteSession(token string) error {
-	if token == "found token" {
-		return nil
+	if mss.DeleteSessionFunc != nil {
+		return mss.DeleteSessionFunc(token)
 	}
-	return fmt.Errorf("this token was not found")
-
+	return errors.New("not implemented")
 }
