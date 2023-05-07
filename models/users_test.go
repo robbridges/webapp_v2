@@ -2,6 +2,8 @@ package models
 
 import (
 	"errors"
+	"golang.org/x/crypto/bcrypt"
+	"strings"
 	"testing"
 )
 
@@ -10,10 +12,15 @@ func TestUserService_Create(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		mockUserService.CreateFunc = func(email string, password string) (*User, error) {
+			hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+			if err != nil {
+				t.Errorf("Error hashing password")
+			}
+			passwordHash := string(hashedBytes)
 			user := &User{
 				ID:           1,
 				Email:        email,
-				PasswordHash: "hashedPassword",
+				PasswordHash: passwordHash,
 			}
 			return user, nil
 		}
@@ -28,7 +35,7 @@ func TestUserService_Create(t *testing.T) {
 		if user.Email != "test@test.com" {
 			t.Errorf("unexpected email: got %v, want %v", user.Email, "test@test.com")
 		}
-		if user.PasswordHash != "hashedPassword" {
+		if user.PasswordHash == "hashedPassword" {
 			t.Errorf("unexpected password hash: got %v, want %v", user.PasswordHash, "hashedPassword")
 		}
 	})
@@ -42,6 +49,20 @@ func TestUserService_Create(t *testing.T) {
 		expectedErr := "database error"
 		if err == nil || err.Error() != expectedErr {
 			t.Errorf("unexpected error: got %v, want %v", err, expectedErr)
+		}
+	})
+
+	t.Run("password too long", func(t *testing.T) {
+		mockUserService.CreateFunc = nil
+
+		password := strings.Repeat("a", 10000) // provide a very long password
+		_, err := mockUserService.Create("test@test.com", password)
+		if err == nil {
+			t.Errorf("expected an error, but got none")
+		}
+		expectedErr := "failed to hash password"
+		if !strings.Contains(err.Error(), expectedErr) {
+			t.Errorf("unexpected error: got %v, want %v", err.Error(), expectedErr)
 		}
 	})
 }
@@ -77,4 +98,5 @@ func TestMockUserService_Authenticate(t *testing.T) {
 	if user != nil || err == nil {
 		t.Errorf("unexpected result: user=%v, err=%v", user, err)
 	}
+
 }
