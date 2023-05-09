@@ -15,13 +15,6 @@ services:
       - 5430:5432 # format here is "port on our machine":"port on container"
     networks:
       - integration_test_network
-  adminer-test:
-    image: adminer
-    restart: always
-    environment:
-      ADMINER_DESIGN: dracula # Pick a theme - https://github.com/vrana/adminer/tree/master/designs
-    ports:
-      - 3334:8080
 
 networks:
   integration_test_network:
