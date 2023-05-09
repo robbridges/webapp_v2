@@ -13,6 +13,8 @@ services:
       POSTGRES_DB: testdb # Database name
     ports: # Expose ports so that apps not running via docker-compose can connect to them.
       - 5430:5432 # format here is "port on our machine":"port on container"
+    networks:
+      - integration_test_network
   adminer-test:
     image: adminer
     restart: always
@@ -20,3 +22,7 @@ services:
       ADMINER_DESIGN: dracula # Pick a theme - https://github.com/vrana/adminer/tree/master/designs
     ports:
       - 3334:8080
+
+networks:
+  integration_test_network:
+    name: integration_test_network
