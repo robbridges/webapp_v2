@@ -1,5 +1,6 @@
 lenslocked
 
 makefile
-
+local.env
 cmd/
+coverage.*

@@ -6,10 +6,22 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/robbridges/webapp_v2/controllers"
 	"github.com/robbridges/webapp_v2/models"
+	"github.com/robbridges/webapp_v2/rand"
 	"github.com/robbridges/webapp_v2/templates"
 	"github.com/robbridges/webapp_v2/views"
+	"github.com/spf13/viper"
 	"net/http"
 )
+
+func init() {
+	viper.SetConfigFile("local.env")
+	viper.AddConfigPath("./")
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("init: %w", err))
+	}
+}
 
 func notFound(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
@@ -26,9 +38,11 @@ func main() {
 	healthTpl := views.Must(views.ParseFS(templates.FS, "healthcheck.gohtml", "tailwind.gohtml"))
 	signupTpl := views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
 	signInTpl := views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
+	currentUserTpl := views.Must(views.ParseFS(templates.FS, "currentuser.gohtml", "tailwind.gohtml"))
 
 	cfg := models.DefaultPostgresConfig()
 	db, err := models.Open(cfg)
+
 	if err != nil {
 		panic(err)
 	}
@@ -38,17 +52,32 @@ func main() {
 		DB: db,
 	}
 
-	usersC := controllers.Users{
-		UserService: &userService,
+	sessionService := models.SessionService{
+		DB: db,
 	}
+
+	logger := &models.DBLogger{
+		DB: db,
+	}
+
+	usersC := controllers.Users{
+		UserService:    &userService,
+		SessionService: &sessionService,
+	}
+
 	usersC.Templates.New = signupTpl
 	usersC.Templates.SignIn = signInTpl
-	csrfKey := models.GenerateRandByteSlice()
+	usersC.Templates.CurrentUser = currentUserTpl
+
+	csrfKey := rand.GenerateRandByteSlice()
 	csrfMw := csrf.Protect(csrfKey, csrf.Secure(false))
 	svr := http.Server{
 		Addr:    ":8080",
-		Handler: csrfMw(r),
+		Handler: r,
 	}
+
+	r.Use(models.LoggerMiddleware(logger))
+	r.Use(csrfMw)
 
 	r.Get("/", controllers.StaticHandler(homeTpl))
 	r.Get("/contact", controllers.StaticHandler(contactTpl))
@@ -58,6 +87,7 @@ func main() {
 	r.Post("/signup", usersC.Create)
 	r.Get("/signin", usersC.SignIn)
 	r.Post("/signin", usersC.ProcessSignIn)
+	r.Post("/signout", usersC.ProcessSignOut)
 	r.Get("/currentuser", usersC.CurrentUser)
 	r.NotFound(notFound)
 	svr.ListenAndServe()

@@ -6,15 +6,16 @@ services:
     image: postgres # The postgres image will be used
     restart: always # Always try to restart if this stops running
     volumes:
-      - ./models/sql/users.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./models/sql:/docker-entrypoint-initdb.d/
     environment: # Provide environment variables
       POSTGRES_USER: rob # POSTGRES_USER env var w/ value rob
       POSTGRES_PASSWORD: redtruck
       POSTGRES_DB: lenslocked # Database name
     ports: # Expose ports so that apps not running via docker-compose can connect to them.
       - 5431:5432 # format here is "port on our machine":"port on container"
+    networks:
+      - dev_network
 
-  # Adminer provides a nice little web UI to connect to databases
   adminer:
     image: adminer
     restart: always
@@ -22,3 +23,9 @@ services:
       ADMINER_DESIGN: dracula # Pick a theme - https://github.com/vrana/adminer/tree/master/designs
     ports:
       - 3333:8080
+    networks:
+      - dev_network
+
+networks:
+  dev_network:
+    name: dev-network

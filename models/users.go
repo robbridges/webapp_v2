@@ -2,10 +2,21 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 )
+
+type UserServiceInterface interface {
+	Create(email, password string) (*User, error)
+	Authenticate(email, password string) (*User, error)
+}
+
+type MockUserService struct {
+	AuthenticateFunc func(email, password string) (*User, error)
+	CreateFunc       func(email string, password string) (*User, error)
+}
 
 type User struct {
 	ID           int
@@ -30,11 +41,8 @@ func (us *UserService) Create(email, password string) (*User, error) {
 		Email:        email,
 		PasswordHash: passwordHash,
 	}
-	row := us.DB.QueryRow(`
-		INSERT INTO USERS (email, password_hash)
-		VALUES ($1, $2) RETURNING id;`, email, passwordHash,
-	)
-	if err := row.Scan(&user.ID); err != nil {
+
+	if err := us.InsertUser(&user); err != nil {
 		return nil, fmt.Errorf("failed to insert user: %w", err)
 	}
 
@@ -65,4 +73,42 @@ func (us *UserService) Authenticate(email, password string) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+func (us *UserService) InsertUser(user *User) error {
+	row := us.DB.QueryRow(`
+		INSERT INTO USERS (email, password_hash)
+		VALUES ($1, $2) RETURNING id;`, user.Email, user.PasswordHash,
+	)
+	if err := row.Scan(&user.ID); err != nil {
+		return fmt.Errorf("failed to insert user: %w", err)
+	}
+	return nil
+}
+
+func (mus *MockUserService) Create(email string, password string) (*User, error) {
+	if mus.CreateFunc != nil {
+		return mus.CreateFunc(email, password)
+	}
+	email = strings.ToLower(email)
+
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("failed to hash password: %w", err)
+	}
+	passwordHash := string(hashedBytes)
+
+	user := User{
+		Email:        email,
+		PasswordHash: passwordHash,
+	}
+
+	return &user, nil
+}
+
+func (mus *MockUserService) Authenticate(email, password string) (*User, error) {
+	if mus.AuthenticateFunc != nil {
+		return mus.AuthenticateFunc(email, password)
+	}
+	return nil, errors.New("AuthenticateFunc is not set")
 }

@@ -4,7 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/spf13/viper"
 )
+
+type PostgressConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Database string
+	SSLMODE  string
+}
 
 // Open will open a sql connection with the provided Postgres. Callers will need to ensure it's closed
 func Open(config PostgressConfig) (*sql.DB, error) {
@@ -20,22 +30,17 @@ func Open(config PostgressConfig) (*sql.DB, error) {
 
 func DefaultPostgresConfig() PostgressConfig {
 	return PostgressConfig{
-		Host:     "localhost",
-		Port:     "5431",
-		User:     "rob",
-		Password: "redtruck",
-		Database: "lenslocked",
+		Host:     viper.GetString("DATABASE_HOST"),
+		Port:     viper.GetString("DATABASE_PORT"),
+		User:     viper.GetString("DATABASE_USER"),
+		Password: viper.GetString("DATABASE_PASSWORD"),
+		Database: viper.GetString("DATABASE"),
 		SSLMODE:  "disable",
 	}
 }
 
-type PostgressConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	Database string
-	SSLMODE  string
+func DefaultPostgesTestConfig() PostgressConfig {
+	return PostgressConfig{}
 }
 
 func (cfg PostgressConfig) String() string {

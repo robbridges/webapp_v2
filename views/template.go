@@ -41,17 +41,8 @@ func ParseFS(fs fs.FS, pattern ...string) (Template, error) {
 
 }
 
-//func Parse(filepath string) (Template, error) {
-//	tpl, err := template.ParseFiles(filepath)
-//	if err != nil {
-//		return Template{}, fmt.Errorf("parsing template: %w", err)
-//	}
-//	return Template{
-//		HtmlTpl: tpl,
-//	}, nil
-//}
-
 func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}) {
+	// clone the template instead of using the same one every time to prevent data races
 	tpl, err := t.HtmlTpl.Clone()
 	if err != nil {
 		log.Printf("cloning template: %v", err)
