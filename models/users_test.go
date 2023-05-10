@@ -71,16 +71,13 @@ func TestMockUserService_Authenticate(t *testing.T) {
 	email := "test@test.com"
 	password := "password"
 
-	// Set up mock user service
 	mockUserService := &MockUserService{}
 
-	// Test case 1: AuthenticateFunc is not set
 	user, err := mockUserService.Authenticate(email, password)
 	if user != nil || err == nil {
 		t.Errorf("unexpected result: user=%v, err=%v", user, err)
 	}
 
-	// Test case 2: AuthenticateFunc is set
 	expectedUser := &User{ID: 1, Email: email}
 	mockUserService.AuthenticateFunc = func(email, password string) (*User, error) {
 		if password == "password" {
@@ -93,7 +90,6 @@ func TestMockUserService_Authenticate(t *testing.T) {
 		t.Errorf("unexpected result: user=%v, err=%v", user, err)
 	}
 
-	// Test case 3: Invalid credentials
 	user, err = mockUserService.Authenticate(email, "wrongpassword")
 	if user != nil || err == nil {
 		t.Errorf("unexpected result: user=%v, err=%v", user, err)
