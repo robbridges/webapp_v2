@@ -37,13 +37,10 @@ func TestNew(t *testing.T) {
 		},
 	}
 
-	// create mock http.ResponseWriter
 	recorder := httptest.NewRecorder()
 
-	// create mock http.Request with email form value
 	req, _ := http.NewRequest("GET", "/?email=test@example.com", nil)
 
-	// call the handler function
 	users.New(recorder, req)
 }
 
@@ -125,18 +122,15 @@ func TestUsers_ProcessSignIn(t *testing.T) {
 		// Call the wrapped handler
 		handler.ServeHTTP(w, r)
 
-		// Assert response
 		if w.Code != http.StatusFound {
 			t.Errorf("unexpected status code: got %v, want %v", w.Code, http.StatusFound)
 		}
 
-		// Assert session cookie was set
 		cookie := w.Header().Get("Set-Cookie")
 		if !strings.Contains(cookie, CookieSession+"="+session.Token) {
 			t.Errorf("cookie not set correctly: got %v, want %v", cookie, CookieSession+"="+session.Token)
 		}
 
-		// Assert no error was logged
 		if len(mockLogger.ErrorLog) > 0 {
 			t.Errorf("unexpected error logged: %v", mockLogger.ErrorLog[0])
 		}
@@ -150,33 +144,27 @@ func TestUsers_ProcessSignIn(t *testing.T) {
 		email := "test@test.com"
 		password := "wrongpassword"
 
-		// Wrap the handler with the logger middleware
 		handler := models.LoggerMiddleware(mockLogger)(http.HandlerFunc(users.ProcessSignIn))
 
-		// Add logger to the request context
 		ctx := context.WithValue(r.Context(), "logger", mockLogger)
 		r = r.WithContext(ctx)
 
-		// Set form values
 		data := url.Values{}
 		data.Set("email", email)
 		data.Set("password", password)
 		r.PostForm = data
 
-		// Call the wrapped handler
 		handler.ServeHTTP(w, r)
 
-		// Assert response
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("unexpected status code: got %v, want %v", w.Code, http.StatusUnauthorized)
 		}
 
-		// Assert no session cookie was set
 		cookie := w.Header().Get("Set-Cookie")
 		if cookie != "" {
 			t.Errorf("unexpected cookie set: got %v, want %v", cookie, "")
 		}
-		// There are 4 errors in the test when ran together
+
 		if len(mockLogger.ErrorLog) != 2 {
 			t.Fatalf("unexpected number of errors logged: got %v, want %v", len(mockLogger.ErrorLog), 1)
 		}
@@ -244,7 +232,6 @@ func TestUsers_ProcessSignIn(t *testing.T) {
 			t.Errorf("unexpected error message: got %v, want %v", err, expectedErr)
 		}
 
-		// Assert cookie was deleted
 		if len(w.Header()["Set-Cookie"]) == 0 {
 			t.Errorf("cookie not deleted: got no cookie")
 		}
