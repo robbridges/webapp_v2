@@ -3,24 +3,10 @@ package integration_tests
 import (
 	"fmt"
 	"github.com/spf13/viper"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"testing"
 )
-
-func listFiles(dir string) error {
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return fmt.Errorf("Failed to read directory: %w", err)
-	}
-
-	fmt.Printf("Files in directory %s:\n", dir)
-	for _, file := range files {
-		fmt.Println(file.Name())
-	}
-	return nil
-}
 
 func loadConfig() {
 	viper.SetConfigFile("../local.env")
@@ -58,6 +44,7 @@ func teardown() {
 }
 
 func TestMain(m *testing.M) {
+	setup()
 	loadConfig()
 
 	// Run tests and get the exit code
@@ -65,4 +52,5 @@ func TestMain(m *testing.M) {
 
 	// Exit with the test result
 	os.Exit(exitCode)
+	teardown()
 }
