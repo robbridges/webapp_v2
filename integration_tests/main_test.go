@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"testing"
 )
 
 func getProjectRoot() (string, error) {
@@ -70,17 +69,17 @@ func teardown() {
 	}
 }
 
-func TestMain(m *testing.M) {
-	loadConfig()
-	// Call the setup function
-	setup()
-
-	// Run tests and get the exit code
-	exitCode := m.Run()
-
-	// Call the teardown function
-	teardown()
-
-	// Exit with the test result
-	os.Exit(exitCode)
-}
+//func TestMain(m *testing.M) {
+//	loadConfig()
+//	// Call the setup function
+//	setup()
+//
+//	// Run tests and get the exit code
+//	exitCode := m.Run()
+//
+//	// Call the teardown function
+//	teardown()
+//
+//	// Exit with the test result
+//	os.Exit(exitCode)
+//}
