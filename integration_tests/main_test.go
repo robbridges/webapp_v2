@@ -1,23 +1,25 @@
 package integration_tests
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/spf13/viper"
-	"log"
+	"io/ioutil"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"testing"
 )
 
-func getProjectRoot() (string, error) {
-	exePath, err := os.Executable()
+func listFiles(dir string) error {
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		return "", fmt.Errorf("Failed to get the executable path: %w", err)
+		return fmt.Errorf("Failed to read directory: %w", err)
 	}
 
-	rootDir := filepath.Dir(filepath.Dir(exePath))
-	return rootDir, nil
+	fmt.Printf("Files in directory %s:\n", dir)
+	for _, file := range files {
+		fmt.Println(file.Name())
+	}
+	return nil
 }
 
 func loadConfig() {
@@ -30,56 +32,42 @@ func loadConfig() {
 }
 
 func setup() {
-	rootDir, err := getProjectRoot()
-	if err != nil {
-		log.Fatalf("Failed to get the current working directory: %v", err)
-	}
+	dir := "../"
 
 	cmd := exec.Command("make", "test-setup")
-	cmd.Dir = rootDir
+	cmd.Dir = dir
 
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
+	err := cmd.Run()
 
-	err = cmd.Run()
 	if err != nil {
-		log.Printf("Command output:\n%s", out.String())
-		log.Fatalf("Failed to set up Docker: %v", err)
+		panic(err)
 	}
 }
 
 func teardown() {
-	rootDir, err := getProjectRoot()
-	if err != nil {
-		log.Fatalf("Failed to get the current working directory: %v", err)
-	}
+	dir := "../"
 
 	cmd := exec.Command("make", "test-teardown")
-	cmd.Dir = rootDir
-	err = cmd.Run()
-
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
+	cmd.Dir = dir
+	err := cmd.Run()
 
 	if err != nil {
-		log.Printf("Command output:\n%s", out.String())
-		log.Fatalf("Failed to set up Docker: %v", err)
+		panic(err)
 	}
+
 }
 
-//func TestMain(m *testing.M) {
-//	loadConfig()
-//	// Call the setup function
-//	setup()
-//
-//	// Run tests and get the exit code
-//	exitCode := m.Run()
-//
-//	// Call the teardown function
-//	teardown()
-//
-//	// Exit with the test result
-//	os.Exit(exitCode)
-//}
+func TestMain(m *testing.M) {
+	loadConfig()
+	// Call the setup function
+	setup()
+
+	// Run tests and get the exit code
+	exitCode := m.Run()
+
+	// Call the teardown function
+	teardown()
+
+	// Exit with the test result
+	os.Exit(exitCode)
+}
