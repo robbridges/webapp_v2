@@ -6,6 +6,8 @@ import (
 )
 
 func TestOpen(t *testing.T) {
+	setup()
+
 	cfg := models.DefaultPostgesTestConfig()
 	db, err := models.Open(cfg)
 
@@ -20,4 +22,6 @@ func TestOpen(t *testing.T) {
 	if db != nil {
 		db.Close()
 	}
+
+	teardown()
 }
