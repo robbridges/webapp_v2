@@ -44,7 +44,7 @@ func teardown() {
 }
 
 func TestMain(m *testing.M) {
-	setup()
+
 	loadConfig()
 
 	// Run tests and get the exit code
@@ -52,5 +52,5 @@ func TestMain(m *testing.M) {
 
 	// Exit with the test result
 	os.Exit(exitCode)
-	teardown()
+
 }

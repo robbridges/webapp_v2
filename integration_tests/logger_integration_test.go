@@ -9,12 +9,15 @@ import (
 )
 
 func TestLoggerMiddleware(t *testing.T) {
+	// Set up test database
+	setup()
 
 	cfg := models.DefaultPostgesTestConfig()
 	db, err := models.Open(cfg)
 	if err != nil {
 		t.Errorf("Error opening db %v", err)
 	}
+	defer teardown()
 
 	// Initialize DBLogger with the test database connection
 	logger := &models.DBLogger{
@@ -35,9 +38,9 @@ func TestLoggerMiddleware(t *testing.T) {
 	}
 
 	// Verify no error logs were stored
-	errorLogsCount, err := getTestLogsCount(db)
+	errorLogsCount, err := getErrorLogsCount(db)
 	if err != nil {
-		t.Errorf("error %v", err)
+		t.Errorf("Unexpected error getting logs, wanted 0, got %d", errorLogsCount)
 	}
 	if errorLogsCount != 0 {
 		t.Errorf("Expected error logs count: 0, but got %d", errorLogsCount)
@@ -59,19 +62,18 @@ func TestLoggerMiddleware(t *testing.T) {
 	}
 
 	// Verify error log was stored
-	errorLogsCount, err = getTestLogsCount(db)
+	errorLogsCount, err = getErrorLogsCount(db)
 	if err != nil {
 		t.Errorf("Unexpected error getting logs")
 	}
 	if errorLogsCount != 1 {
 		t.Errorf("Expected error logs count: 1, but got %d", errorLogsCount)
 	}
-
 }
 
-func getTestLogsCount(db *sql.DB) (int, error) {
+func getErrorLogsCount(db *sql.DB) (int, error) {
 	var count int
-	err := db.QueryRow("SELECT COUNT(id) FROM logs;").Scan(&count)
+	err := db.QueryRow("SELECT COUNT(*) FROM logs").Scan(&count)
 	if err != nil {
 		return 0, err
 	}
