@@ -6,12 +6,15 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestLoggerMiddleware(t *testing.T) {
 	// Set up test database
 
-	db, pool, resource := setup()
+	setup()
+	cfg := models.DefaultPostgesTestConfig()
+	db, err := models.Open(cfg)
 
 	defer db.Close()
 
@@ -19,6 +22,9 @@ func TestLoggerMiddleware(t *testing.T) {
 	logger := &models.DBLogger{
 		DB: db,
 	}
+
+	timeout := 10 * time.Second
+	waitForPing(db, timeout)
 
 	handlerFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	loggerMiddleware := models.LoggerMiddleware(logger)(handlerFunc)
@@ -65,7 +71,7 @@ func TestLoggerMiddleware(t *testing.T) {
 	if errorLogsCount != 1 {
 		t.Errorf("Expected error logs count: 1, but got %d", errorLogsCount)
 	}
-	teardown(pool, resource)
+	teardown()
 }
 
 func getErrorLogsCount(db *sql.DB) (int, error) {

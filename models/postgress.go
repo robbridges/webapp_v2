@@ -42,7 +42,7 @@ func DefaultPostgresConfig() PostgressConfig {
 func DefaultPostgesTestConfig() PostgressConfig {
 	return PostgressConfig{
 		Host:     viper.GetString("TEST_DATABASE_HOST"),
-		Port:     viper.GetString("TEST_DATABASE_PORT"),
+		Port:     viper.GetString("TEST_DATABASE_PORT"), // Update the key to "TEST_DATABASE_PORT"
 		User:     viper.GetString("TEST_DATABASE_USER"),
 		Password: viper.GetString("TEST_DATABASE_PASSWORD"),
 		Database: viper.GetString("TEST_DATABASE"),

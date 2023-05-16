@@ -4,12 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/ory/dockertest/v3"
-	"github.com/robbridges/webapp_v2/models"
 	"github.com/spf13/viper"
-	"log"
 	"os"
+	"os/exec"
 	"testing"
+	"time"
 )
 
 func loadConfig() {
@@ -21,64 +20,47 @@ func loadConfig() {
 	}
 }
 
-//func setup() {
-//	dir := "../"
-//
-//	cmd := exec.Command("make", "test-setup")
-//	cmd.Dir = dir
-//
-//	err := cmd.Run()
-//
-//	if err != nil {
-//		panic(err)
-//	}
-//}
-//
-//func teardown() {
-//	dir := "../"
-//
-//	cmd := exec.Command("make", "test-teardown")
-//	cmd.Dir = dir
-//	err := cmd.Run()
-//
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//}
+func setup() {
+	dir := "../"
 
-func setup() (*sql.DB, *dockertest.Pool, *dockertest.Resource) {
-	cfg := models.DefaultPostgesTestConfig()
-	pool, err := dockertest.NewPool("")
+	cmd := exec.Command("make", "test-setup")
+	cmd.Dir = dir
+
+	err := cmd.Run()
+
 	if err != nil {
-		log.Fatalf("Failed to create Docker pool: %v", err)
+		panic(err)
 	}
-
-	resource, err := pool.Run("postgres", "13-alpine", []string{
-		"POSTGRES_USER=dev",
-		"POSTGRES_PASSWORD=test",
-		"POSTGRES_DB=testdb",
-		"POSTGRES_PORT=5433",
-	})
-	if err != nil {
-		log.Fatalf("Failed to start PostgreSQL container: %v", err)
-	}
-
-	conn, err := models.Open(cfg)
-	if err != nil {
-		log.Fatalf("Failed to connect to test database: %v", err)
-	}
-
-	return conn, pool, resource
 }
 
-func teardown(pool *dockertest.Pool, resource *dockertest.Resource) {
-	if resource != nil {
-		err := pool.Purge(resource)
-		if err != nil {
-			log.Fatalf("Failed to purge Docker resource: %v", err)
-		}
+func teardown() {
+	dir := "../"
+
+	cmd := exec.Command("make", "test-teardown")
+	cmd.Dir = dir
+	err := cmd.Run()
+
+	if err != nil {
+		panic(err)
 	}
+
+}
+
+func waitForPing(db *sql.DB, timeout time.Duration) error {
+	startTime := time.Now()
+	deadline := startTime.Add(timeout)
+
+	for time.Now().Before(deadline) {
+		err := db.Ping()
+		if err == nil {
+			return nil // Condition met
+		}
+
+		// Sleep for a short interval before retrying
+		time.Sleep(1 * time.Second)
+	}
+
+	return fmt.Errorf("timeout waiting for DB.Ping")
 }
 
 func TestMain(m *testing.M) {
