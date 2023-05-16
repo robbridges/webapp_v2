@@ -2,6 +2,7 @@ package integration_tests
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/robbridges/webapp_v2/models"
 	"net/http"
 	"net/http/httptest"
@@ -11,11 +12,9 @@ import (
 
 func TestLoggerMiddleware(t *testing.T) {
 	// Set up test database
-
 	setup()
 	cfg := models.DefaultPostgesTestConfig()
 	db, err := models.Open(cfg)
-
 	defer db.Close()
 
 	// Initialize DBLogger with the test database connection
@@ -71,6 +70,22 @@ func TestLoggerMiddleware(t *testing.T) {
 	if errorLogsCount != 1 {
 		t.Errorf("Expected error logs count: 1, but got %d", errorLogsCount)
 	}
+
+	// Test logger.Create()
+	err = logger.Create(errors.New("test error"))
+	if err != nil {
+		t.Errorf("Failed to create log entry: %v", err)
+	}
+
+	// Verify error log was stored
+	errorLogsCount, err = getErrorLogsCount(db)
+	if err != nil {
+		t.Errorf("Unexpected error getting logs")
+	}
+	if errorLogsCount != 2 {
+		t.Errorf("Expected error logs count: 2, but got %d", errorLogsCount)
+	}
+
 	teardown()
 }
 
