@@ -1,11 +1,11 @@
-package integration_tests
+package integration_test
 
 import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/spf13/viper"
-	"os"
+	"log"
 	"os/exec"
 	"testing"
 	"time"
@@ -64,13 +64,16 @@ func waitForPing(db *sql.DB, timeout time.Duration) error {
 }
 
 func TestMain(m *testing.M) {
-
 	loadConfig()
 
 	// Run tests and get the exit code
 	exitCode := m.Run()
 
-	// Exit with the test result
-	os.Exit(exitCode)
+	// Check the exit code and log an error message if non-zero
+	if exitCode != 0 {
+		log.Fatal("Tests failed")
+	}
 
+	// No error occurred, so the tests passed
+	log.Println("All tests passed")
 }

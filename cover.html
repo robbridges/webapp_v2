@@ -1,0 +1,792 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>controllers: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/robbridges/webapp_v2/controllers/cookie.go (100.0%)</option>
+				
+				<option value="file1">github.com/robbridges/webapp_v2/controllers/static.go (100.0%)</option>
+				
+				<option value="file2">github.com/robbridges/webapp_v2/controllers/template.go (100.0%)</option>
+				
+				<option value="file3">github.com/robbridges/webapp_v2/controllers/users.go (70.6%)</option>
+				
+				<option value="file4">github.com/robbridges/webapp_v2/models/logs.go (66.7%)</option>
+				
+				<option value="file5">github.com/robbridges/webapp_v2/models/postgress.go (42.9%)</option>
+				
+				<option value="file6">github.com/robbridges/webapp_v2/models/session.go (21.2%)</option>
+				
+				<option value="file7">github.com/robbridges/webapp_v2/models/token.go (100.0%)</option>
+				
+				<option value="file8">github.com/robbridges/webapp_v2/models/users.go (25.0%)</option>
+				
+				<option value="file9">github.com/robbridges/webapp_v2/rand/rand.go (80.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package controllers
+
+import (
+        "fmt"
+        "github.com/robbridges/webapp_v2/models"
+        "net/http"
+)
+
+const (
+        CookieSession = "session"
+)
+
+func newCookie(name, value string) *http.Cookie <span class="cov8" title="1">{
+        cookie := http.Cookie{
+                Name:     name,
+                Value:    value,
+                Path:     "/",
+                HttpOnly: true,
+        }
+
+        return &amp;cookie
+}</span>
+
+func setCookie(w http.ResponseWriter, name, value string) <span class="cov8" title="1">{
+        cookie := newCookie(name, value)
+        http.SetCookie(w, cookie)
+}</span>
+
+func readCookie(r *http.Request, name string) (string, error) <span class="cov8" title="1">{
+        logger := r.Context().Value("logger").(models.LogInterface)
+        c, err := r.Cookie(name)
+        if err != nil </span><span class="cov8" title="1">{
+                logger.Create(err)
+                return "", fmt.Errorf("cookie %s: read error: %w", name, err)
+        }</span>
+        <span class="cov8" title="1">return c.Value, nil</span>
+}
+
+func deleteCookie(w http.ResponseWriter, name string) <span class="cov8" title="1">{
+        cookie := newCookie(name, "")
+        cookie.MaxAge = -1
+        http.SetCookie(w, cookie)
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package controllers
+
+import (
+        "html/template"
+        "net/http"
+)
+
+func StaticHandler(tpl Template) http.HandlerFunc <span class="cov8" title="1">{
+        return func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                tpl.Execute(w, r, nil)
+        }</span>
+}
+
+func FAQ(tpl Template) http.HandlerFunc <span class="cov8" title="1">{
+        questions := []struct {
+                Question string
+                Answer   template.HTML
+        }{
+                {
+                        Question: "Is there a free trial?",
+                        Answer:   "Yes we offer a 30 day free trial for all sign-ups.",
+                },
+                {
+                        Question: "What are your support hours?",
+                        Answer: "We have support staff answering emails 24/7, response times mayb e a bit slower on weekends and " +
+                                "holidays",
+                },
+                {
+                        Question: "How do I contact support?",
+                        Answer:   `Email us - &lt;a href="mailto:support@lenslocked.com"&gt;support@lenslocked.com&lt;/a&gt;`,
+                },
+                {
+                        Question: "Where are you located?",
+                        Answer:   "Our team is fully remote!",
+                },
+        }
+
+        return func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                tpl.Execute(w, r, questions)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package controllers
+
+import "net/http"
+
+type Template interface {
+        Execute(w http.ResponseWriter, r *http.Request, data interface{})
+}
+
+type MockTemplate struct {
+        ExecuteFunc func(w http.ResponseWriter, r *http.Request, data interface{})
+}
+
+func (mt *MockTemplate) Execute(w http.ResponseWriter, r *http.Request, data interface{}) <span class="cov8" title="1">{
+        mt.ExecuteFunc(w, r, data)
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package controllers
+
+import (
+        "fmt"
+        "github.com/robbridges/webapp_v2/models"
+        "net/http"
+)
+
+type Users struct {
+        Templates struct {
+                New         Template
+                SignIn      Template
+                CurrentUser Template
+        }
+        UserService    models.UserServiceInterface
+        SessionService models.SessionServiceInterface
+}
+
+func (u Users) New(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var data struct {
+                Email string
+        }
+
+        data.Email = r.FormValue("email")
+
+        u.Templates.New.Execute(w, r, data)
+}</span>
+
+func (u Users) SignIn(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var data struct {
+                Email string
+        }
+
+        data.Email = r.FormValue("email")
+        u.Templates.SignIn.Execute(w, r, data)
+}</span>
+
+func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        logger := r.Context().Value("logger").(models.LogInterface)
+        var data struct {
+                Email    string
+                Password string
+        }
+
+        data.Email = r.FormValue("email")
+        data.Password = r.FormValue("password")
+        user, err := u.UserService.Authenticate(data.Email, data.Password)
+        if err != nil </span><span class="cov8" title="1">{
+                logger.Create(err)
+                http.Error(w, "Something went wrong", http.StatusBadRequest)
+        }</span>
+
+        <span class="cov8" title="1">session, err := u.SessionService.Create(user.ID)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Create(err)
+                fmt.Println(err)
+                http.Error(w, "Something went wrong", http.StatusInternalServerError)
+                return
+        }</span>
+
+        <span class="cov8" title="1">setCookie(w, CookieSession, session.Token)
+
+        http.Redirect(w, r, "/currentuser", http.StatusFound)</span>
+
+}
+
+func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        logger := r.Context().Value("logger").(models.LogInterface)
+        tokenCookie, err := readCookie(r, CookieSession)
+        if err != nil </span><span class="cov8" title="1">{
+                logger.Create(err)
+                fmt.Println(err)
+                http.Redirect(w, r, "/signin", http.StatusFound)
+                return
+        }</span>
+        <span class="cov0" title="0">user, err := u.SessionService.User(tokenCookie)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Create(err)
+                fmt.Println(err)
+                http.Redirect(w, r, "/signin", http.StatusFound)
+                return
+        }</span>
+        <span class="cov0" title="0">var data struct {
+                Email string
+        }
+
+        data.Email = user.Email
+
+        u.Templates.CurrentUser.Execute(w, r, data)</span>
+}
+
+func (u Users) Create(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        logger := r.Context().Value("logger").(models.LogInterface)
+        email := r.FormValue("email")
+        password := r.FormValue("password")
+        user, err := u.UserService.Create(email, password)
+        if err != nil </span><span class="cov8" title="1">{
+                logger.Create(err)
+                fmt.Println(err)
+                http.Error(w, "Something went wrong", http.StatusInternalServerError)
+                return
+        }</span>
+        <span class="cov8" title="1">session, err := u.SessionService.Create(user.ID)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Create(err)
+                fmt.Println(err)
+                //TODO: Long term there's a better way to handle this without a confusing redirect
+                http.Redirect(w, r, "/signin", http.StatusFound)
+                return
+        }</span>
+        <span class="cov8" title="1">setCookie(w, CookieSession, session.Token)
+        http.Redirect(w, r, "/currentuser", http.StatusFound)</span>
+}
+
+func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        logger := r.Context().Value("logger").(models.LogInterface)
+        token, err := readCookie(r, CookieSession)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Create(err)
+                http.Redirect(w, r, "/signin", http.StatusFound)
+                return
+        }</span>
+
+        <span class="cov8" title="1">err = u.SessionService.DeleteSession(token)
+        if err != nil </span><span class="cov8" title="1">{
+                logger.Create(err)
+                fmt.Errorf("delete session %w", err)
+                http.Error(w, "Something went wrong", http.StatusInternalServerError)
+        }</span>
+        <span class="cov8" title="1">deleteCookie(w, CookieSession)
+        http.Redirect(w, r, "/signin", http.StatusFound)</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package models
+
+import (
+        "context"
+        "database/sql"
+        "fmt"
+        "net/http"
+        "time"
+)
+
+type LogInterface interface {
+        Create(error) error
+}
+
+type Log struct {
+        message   string
+        timeStamp time.Time
+}
+
+type DBLogger struct {
+        DB *sql.DB
+}
+
+type MockLogger struct {
+        ErrorLog []error
+}
+
+func (logger *DBLogger) Create(err error) error <span class="cov0" title="0">{
+        errorTime := time.Now()
+        _, logError := logger.DB.Exec(`
+        INSERT INTO logs(message, timestamp) 
+        VALUES ($1, $2)
+        `, err.Error(), errorTime)
+        if logError != nil </span><span class="cov0" title="0">{
+                return logError
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (ml *MockLogger) Create(err error) error <span class="cov8" title="1">{
+        ml.ErrorLog = append(ml.ErrorLog, err)
+        return nil
+}</span>
+
+func LoggerMiddleware(loggerInterface LogInterface) func(next http.Handler) http.Handler <span class="cov8" title="1">{
+        return func(next http.Handler) http.Handler </span><span class="cov8" title="1">{
+                return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                        defer func() </span><span class="cov8" title="1">{
+                                if err := recover(); err != nil </span><span class="cov8" title="1">{
+                                        loggerInterface.Create(fmt.Errorf("panic: %v", err))
+                                        http.Error(w, "Internal server error", http.StatusInternalServerError)
+                                }</span>
+                        }()
+                        <span class="cov8" title="1">ctx := context.WithValue(r.Context(), "logger", loggerInterface)
+                        next.ServeHTTP(w, r.WithContext(ctx))</span>
+                })
+        }
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package models
+
+import (
+        "database/sql"
+        "fmt"
+        _ "github.com/jackc/pgx/v4/stdlib"
+        "github.com/spf13/viper"
+)
+
+type PostgressConfig struct {
+        Host     string
+        Port     string
+        User     string
+        Password string
+        Database string
+        SSLMODE  string
+}
+
+// Open will open a sql connection with the provided Postgres. Callers will need to ensure it's closed
+func Open(config PostgressConfig) (*sql.DB, error) <span class="cov0" title="0">{
+        db, err := sql.Open(
+                "pgx",
+                config.String(),
+        )
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("error Opening DB: %w", err)
+        }</span>
+        <span class="cov0" title="0">return db, nil</span>
+}
+
+func DefaultPostgresConfig() PostgressConfig <span class="cov8" title="1">{
+        return PostgressConfig{
+                Host:     viper.GetString("DATABASE_HOST"),
+                Port:     viper.GetString("DATABASE_PORT"),
+                User:     viper.GetString("DATABASE_USER"),
+                Password: viper.GetString("DATABASE_PASSWORD"),
+                Database: viper.GetString("DATABASE"),
+                SSLMODE:  "disable",
+        }
+}</span>
+
+func DefaultPostgesTestConfig() PostgressConfig <span class="cov8" title="1">{
+        return PostgressConfig{
+                Host:     viper.GetString("TEST_DATABASE_HOST"),
+                Port:     viper.GetString("TEST_DATABASE_PORT"), // Update the key to "TEST_DATABASE_PORT"
+                User:     viper.GetString("TEST_DATABASE_USER"),
+                Password: viper.GetString("TEST_DATABASE_PASSWORD"),
+                Database: viper.GetString("TEST_DATABASE"),
+                SSLMODE:  "disable",
+        }
+}</span>
+
+func (cfg PostgressConfig) String() string <span class="cov8" title="1">{
+        return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+                cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Database, cfg.SSLMODE)
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package models
+
+import (
+        "crypto/sha256"
+        "database/sql"
+        "encoding/base64"
+        "errors"
+        "fmt"
+)
+
+type SessionServiceInterface interface {
+        Create(userID int) (*Session, error)
+        User(token string) (*User, error)
+        DeleteSession(token string) error
+}
+
+type Session struct {
+        ID     int
+        UserID int
+        //Token is only set when creating a new session, we only store the has into the db, so if you're looking up a session
+        // This will be unavailable
+        Token     string
+        TokenHash string
+}
+
+type SessionService struct {
+        DB *sql.DB
+}
+
+type MockSessionService struct {
+        CreateFunc        func(userID int) (*Session, error)
+        UserFunc          func(token string) (*User, error)
+        DeleteSessionFunc func(token string) error
+}
+
+// Create will create a new session for the user provided the session token is the returned string to be stored
+// in our Postgres user table
+func (ss *SessionService) Create(userID int) (*Session, error) <span class="cov0" title="0">{
+        tokenManager := tokenManager{
+                BytesPerToken: 32,
+        }
+        token, err := tokenManager.New()
+        session := Session{
+                UserID:    userID,
+                Token:     token,
+                TokenHash: Hash(token),
+        }
+        row := ss.DB.QueryRow(`
+                UPDATE sessions
+                SET token_hash = $2
+                WHERE user_id = $1
+            RETURNING id;`, session.UserID, session.TokenHash)
+        err = row.Scan(&amp;session.ID)
+        if err == sql.ErrNoRows </span><span class="cov0" title="0">{
+                // If no session exists, we will get ErrNoRows. That means we need to
+                // create a session object for that user.
+                row = ss.DB.QueryRow(`
+                        INSERT INTO sessions (user_id, token_hash)
+                        VALUES ($1, $2)
+                        RETURNING id;`, session.UserID, session.TokenHash)
+                // The error will be overwritten with either a new error, or nil
+                err = row.Scan(&amp;session.ID)
+        }</span>
+
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("create %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;session, nil</span>
+}
+
+func (ss *SessionService) User(token string) (*User, error) <span class="cov0" title="0">{
+        tokenHash := Hash(token)
+        var user User
+        row := ss.DB.QueryRow(`
+        SELECT u.email, u.password_hash 
+        FROM sessions s
+        INNER JOIN users u ON s.user_id = u.id
+        WHERE s.token_hash = $1;
+        `, tokenHash)
+        if err := row.Scan(&amp;user.Email, &amp;user.PasswordHash); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("user: %w", err)
+        }</span>
+        <span class="cov0" title="0">return &amp;user, nil</span>
+}
+
+func (ss *SessionService) DeleteSession(token string) error <span class="cov0" title="0">{
+        tokenHash := Hash(token)
+        _, err := ss.DB.Exec(`
+        DELETE FROM sessions 
+        WHERE token_hash = $1
+        `, tokenHash)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("Signout: %w", err)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func Hash(token string) string <span class="cov0" title="0">{
+        tokenHash := sha256.Sum256([]byte(token))
+        return base64.URLEncoding.EncodeToString(tokenHash[:])
+}</span>
+
+func (mss *MockSessionService) Create(userID int) (*Session, error) <span class="cov8" title="1">{
+        if mss.CreateFunc != nil </span><span class="cov8" title="1">{
+                return mss.CreateFunc(userID)
+        }</span>
+        <span class="cov0" title="0">return nil, errors.New("not implemented")</span>
+}
+
+func (mss *MockSessionService) User(token string) (*User, error) <span class="cov8" title="1">{
+        if mss.UserFunc != nil </span><span class="cov8" title="1">{
+                return mss.UserFunc(token)
+        }</span>
+        <span class="cov8" title="1">return nil, errors.New("not implemented")</span>
+}
+
+func (mss *MockSessionService) DeleteSession(token string) error <span class="cov8" title="1">{
+        if mss.DeleteSessionFunc != nil </span><span class="cov8" title="1">{
+                return mss.DeleteSessionFunc(token)
+        }</span>
+        <span class="cov0" title="0">return errors.New("not implemented")</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package models
+
+import (
+        "fmt"
+        "github.com/robbridges/webapp_v2/rand"
+)
+
+const (
+        MinBytesPerToken = 32
+)
+
+type tokenManager struct {
+        BytesPerToken int
+}
+
+func (tm *tokenManager) New() (string, error) <span class="cov8" title="1">{
+        bytesPerToken := tm.BytesPerToken
+        // Check what Bytes per Token is set 0, if not set or less than the min bytes we over ride it to the min bytes.
+        if bytesPerToken &lt; MinBytesPerToken </span><span class="cov8" title="1">{
+                bytesPerToken = MinBytesPerToken
+        }</span>
+
+        <span class="cov8" title="1">token, err := rand.String(bytesPerToken)
+        if err != nil </span><span class="cov8" title="1">{
+                return "", fmt.Errorf("create session token: %w", err)
+        }</span>
+        <span class="cov8" title="1">return token, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package models
+
+import (
+        "database/sql"
+        "errors"
+        "fmt"
+        "golang.org/x/crypto/bcrypt"
+        "strings"
+)
+
+type UserServiceInterface interface {
+        Create(email, password string) (*User, error)
+        Authenticate(email, password string) (*User, error)
+}
+
+type MockUserService struct {
+        AuthenticateFunc func(email, password string) (*User, error)
+        CreateFunc       func(email string, password string) (*User, error)
+}
+
+type User struct {
+        ID           int
+        Email        string
+        PasswordHash string
+}
+
+type UserService struct {
+        DB *sql.DB
+}
+
+func (us *UserService) Create(email, password string) (*User, error) <span class="cov0" title="0">{
+        email = strings.ToLower(email)
+
+        hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to Hash password: %w", err)
+        }</span>
+        <span class="cov0" title="0">passwordHash := string(hashedBytes)
+
+        user := User{
+                Email:        email,
+                PasswordHash: passwordHash,
+        }
+
+        if err := us.InsertUser(&amp;user); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to insert user: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;user, nil</span>
+}
+
+func (us *UserService) Authenticate(email, password string) (*User, error) <span class="cov0" title="0">{
+        email = strings.ToLower(email)
+        user := User{
+                Email: email,
+        }
+
+        row := us.DB.QueryRow(
+                `SELECT id, password_hash
+                FROM users WHERE email=$1`, email,
+        )
+
+        err := row.Scan(&amp;user.ID, &amp;user.PasswordHash)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("authenticate: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Errorf("compare() error: %v", err)
+                return nil, fmt.Errorf("authenticate: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;user, nil</span>
+}
+
+func (us *UserService) InsertUser(user *User) error <span class="cov0" title="0">{
+        row := us.DB.QueryRow(`
+                INSERT INTO USERS (email, password_hash)
+                VALUES ($1, $2) RETURNING id;`, user.Email, user.PasswordHash,
+        )
+        if err := row.Scan(&amp;user.ID); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to insert user: %w", err)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (mus *MockUserService) Create(email string, password string) (*User, error) <span class="cov8" title="1">{
+        if mus.CreateFunc != nil </span><span class="cov8" title="1">{
+                return mus.CreateFunc(email, password)
+        }</span>
+        <span class="cov8" title="1">email = strings.ToLower(email)
+
+        hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("failed to Hash password: %w", err)
+        }</span>
+        <span class="cov0" title="0">passwordHash := string(hashedBytes)
+
+        user := User{
+                Email:        email,
+                PasswordHash: passwordHash,
+        }
+
+        return &amp;user, nil</span>
+}
+
+func (mus *MockUserService) Authenticate(email, password string) (*User, error) <span class="cov8" title="1">{
+        if mus.AuthenticateFunc != nil </span><span class="cov8" title="1">{
+                return mus.AuthenticateFunc(email, password)
+        }</span>
+        <span class="cov8" title="1">return nil, errors.New("AuthenticateFunc is not set")</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package rand
+
+import (
+        "crypto/rand"
+        "encoding/base64"
+        "fmt"
+)
+
+func Bytes(n int) ([]byte, error) <span class="cov8" title="1">{
+        b := make([]byte, n)
+        nRead, err := rand.Read(b)
+
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("bytes: %w", err)
+        }</span>
+        // we actually want to error check first, if we get this far and there's not enough bytes, and no error
+        // we have a problem.
+        <span class="cov8" title="1">if nRead &lt; n </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("bytes: Did not read enough random bytes")
+        }</span>
+
+        <span class="cov8" title="1">return b, nil</span>
+}
+
+// String returns a string from a random byte slice that is created in
+// Bytes N is the number of bytes being used to generate string
+func String(n int) (string, error) <span class="cov8" title="1">{
+        b, err := Bytes(n)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("string: %w", err)
+        }</span>
+        <span class="cov8" title="1">return base64.URLEncoding.EncodeToString(b), nil</span>
+}
+
+// GenerateRandByteSlice is for our csrf byte slice
+func GenerateRandByteSlice() []byte <span class="cov8" title="1">{
+        byteSlice := make([]byte, 32)
+        if _, err := rand.Read(byteSlice); err != nil </span><span class="cov0" title="0">{
+                fmt.Errorf("error generating byteSlice: %v", err)
+        }</span>
+
+        <span class="cov8" title="1">return byteSlice</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
