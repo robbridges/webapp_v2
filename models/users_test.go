@@ -36,7 +36,7 @@ func TestUserService_Create(t *testing.T) {
 			t.Errorf("unexpected email: got %v, want %v", user.Email, "test@test.com")
 		}
 		if user.PasswordHash == "hashedPassword" {
-			t.Errorf("unexpected password hash: got %v, want %v", user.PasswordHash, "hashedPassword")
+			t.Errorf("unexpected password Hash: got %v, want %v", user.PasswordHash, "hashedPassword")
 		}
 	})
 
@@ -60,7 +60,7 @@ func TestUserService_Create(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected an error, but got none")
 		}
-		expectedErr := "failed to hash password"
+		expectedErr := "failed to Hash password"
 		if !strings.Contains(err.Error(), expectedErr) {
 			t.Errorf("unexpected error: got %v, want %v", err.Error(), expectedErr)
 		}

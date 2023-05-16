@@ -33,7 +33,7 @@ func (us *UserService) Create(email, password string) (*User, error) {
 
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, fmt.Errorf("failed to hash password: %w", err)
+		return nil, fmt.Errorf("failed to Hash password: %w", err)
 	}
 	passwordHash := string(hashedBytes)
 
@@ -94,7 +94,7 @@ func (mus *MockUserService) Create(email string, password string) (*User, error)
 
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, fmt.Errorf("failed to hash password: %w", err)
+		return nil, fmt.Errorf("failed to Hash password: %w", err)
 	}
 	passwordHash := string(hashedBytes)
 

@@ -43,7 +43,7 @@ func (ss *SessionService) Create(userID int) (*Session, error) {
 	session := Session{
 		UserID:    userID,
 		Token:     token,
-		TokenHash: hash(token),
+		TokenHash: Hash(token),
 	}
 	row := ss.DB.QueryRow(`
 		UPDATE sessions
@@ -70,7 +70,7 @@ func (ss *SessionService) Create(userID int) (*Session, error) {
 }
 
 func (ss *SessionService) User(token string) (*User, error) {
-	tokenHash := hash(token)
+	tokenHash := Hash(token)
 	var user User
 	row := ss.DB.QueryRow(`
 	SELECT u.email, u.password_hash 
@@ -85,7 +85,7 @@ func (ss *SessionService) User(token string) (*User, error) {
 }
 
 func (ss *SessionService) DeleteSession(token string) error {
-	tokenHash := hash(token)
+	tokenHash := Hash(token)
 	_, err := ss.DB.Exec(`
 	DELETE FROM sessions 
 	WHERE token_hash = $1
@@ -96,7 +96,7 @@ func (ss *SessionService) DeleteSession(token string) error {
 	return nil
 }
 
-func hash(token string) string {
+func Hash(token string) string {
 	tokenHash := sha256.Sum256([]byte(token))
 	return base64.URLEncoding.EncodeToString(tokenHash[:])
 }
