@@ -14,7 +14,7 @@ func TestCreateSession(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to connect to test database: %v", err)
 	}
-	defer db.Close()
+	defer deferDBClose(db, &err)
 	defer teardown()
 
 	sessionService := &models.SessionService{DB: db}
@@ -91,7 +91,7 @@ func TestGetUserByToken(t *testing.T) {
 		t.Fatalf("failed to connect to test database: %v", err)
 	}
 
-	defer db.Close()
+	defer deferDBClose(db, &err)
 	defer teardown()
 
 	sessionService := &models.SessionService{DB: db}
@@ -143,7 +143,7 @@ func TestDeleteSession(t *testing.T) {
 		t.Fatalf("failed to connect to test database: %v", err)
 	}
 
-	defer db.Close()
+	defer deferDBClose(db, &err)
 	defer teardown()
 
 	sessionService := &models.SessionService{DB: db}

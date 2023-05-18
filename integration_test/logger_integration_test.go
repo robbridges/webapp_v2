@@ -14,7 +14,8 @@ func TestLoggerMiddleware(t *testing.T) {
 	// Set up test database
 	db, err := setup(t)
 
-	defer db.Close()
+	defer deferDBClose(db, &err)
+	defer teardown()
 
 	logger := &models.DBLogger{
 		DB: db,
@@ -82,7 +83,6 @@ func TestLoggerMiddleware(t *testing.T) {
 		t.Errorf("Expected error logs count: 2, but got %d", errorLogsCount)
 	}
 
-	teardown()
 }
 
 func getErrorLogsCount(db *sql.DB) (int, error) {

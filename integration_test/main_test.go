@@ -72,6 +72,27 @@ func waitForPing(db *sql.DB, timeout time.Duration) error {
 	return fmt.Errorf("timeout waiting for DB.Ping")
 }
 
+func closeDB(db *sql.DB) error {
+	if db != nil {
+		return db.Close()
+	}
+	return nil
+}
+
+// deferDBClose now returns a function which can be deferred.
+func deferDBClose(db *sql.DB, existingErr *error) func() {
+	return func() {
+		closeErr := closeDB(db)
+		if closeErr != nil {
+			if *existingErr == nil {
+				*existingErr = closeErr
+			} else {
+				fmt.Printf("Warning: Got an error when closing DB: %v\n", closeErr)
+			}
+		}
+	}
+}
+
 func TestMain(m *testing.M) {
 	loadConfig()
 

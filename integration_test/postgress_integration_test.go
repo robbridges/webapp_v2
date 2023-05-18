@@ -11,7 +11,7 @@ func TestOpen(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error opening db: %v", err)
 	}
-	defer db.Close()
+	defer deferDBClose(db, &err)
 	defer teardown()
 
 	if db == nil {
