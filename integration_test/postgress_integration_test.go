@@ -1,15 +1,13 @@
 package integration_test
 
 import (
-	"github.com/robbridges/webapp_v2/models"
 	"testing"
 	"time"
 )
 
 func TestOpen(t *testing.T) {
-	setup()
-	cfg := models.DefaultPostgesTestConfig()
-	db, err := models.Open(cfg)
+	db, err := setup(t)
+
 	if err != nil {
 		t.Errorf("Error opening db: %v", err)
 	}

@@ -9,9 +9,7 @@ import (
 
 func TestUserService_Create(t *testing.T) {
 	// Get a database connection
-	setup()
-	cfg := models.DefaultPostgesTestConfig()
-	db, err := models.Open(cfg)
+	db, err := setup(t)
 
 	if err != nil {
 		t.Fatalf("failed to connect to test database: %v", err)
@@ -61,13 +59,12 @@ func TestUserService_Create(t *testing.T) {
 
 func TestUserService_Authenticate(t *testing.T) {
 	// Get a database connection
-	setup()
-	cfg := models.DefaultPostgesTestConfig()
-	db, err := models.Open(cfg)
+	db, err := setup(t)
 
 	if err != nil {
 		t.Fatalf("failed to connect to test database: %v", err)
 	}
+	
 	defer db.Close()
 	defer teardown()
 

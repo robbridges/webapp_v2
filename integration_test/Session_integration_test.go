@@ -9,9 +9,7 @@ import (
 func TestCreateSession(t *testing.T) {
 
 	// Set up a test database
-	setup()
-	cfg := models.DefaultPostgesTestConfig()
-	db, err := models.Open(cfg)
+	db, err := setup(t)
 
 	if err != nil {
 		t.Fatalf("failed to connect to test database: %v", err)
@@ -87,9 +85,7 @@ func TestCreateSession(t *testing.T) {
 }
 
 func TestGetUserByToken(t *testing.T) {
-	setup()
-	cfg := models.DefaultPostgesTestConfig()
-	db, err := models.Open(cfg)
+	db, err := setup(t)
 
 	if err != nil {
 		t.Fatalf("failed to connect to test database: %v", err)
@@ -141,9 +137,7 @@ func TestGetUserByToken(t *testing.T) {
 }
 
 func TestDeleteSession(t *testing.T) {
-	setup()
-	cfg := models.DefaultPostgesTestConfig()
-	db, err := models.Open(cfg)
+	db, err := setup(t)
 
 	if err != nil {
 		t.Fatalf("failed to connect to test database: %v", err)

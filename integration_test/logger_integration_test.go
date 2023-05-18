@@ -12,9 +12,8 @@ import (
 
 func TestLoggerMiddleware(t *testing.T) {
 	// Set up test database
-	setup()
-	cfg := models.DefaultPostgesTestConfig()
-	db, err := models.Open(cfg)
+	db, err := setup(t)
+
 	defer db.Close()
 
 	logger := &models.DBLogger{

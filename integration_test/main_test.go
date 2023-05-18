@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/robbridges/webapp_v2/models"
 	"github.com/spf13/viper"
 	"log"
 	"os/exec"
@@ -20,7 +21,7 @@ func loadConfig() {
 	}
 }
 
-func setup() {
+func setup(t *testing.T) (*sql.DB, error) {
 	dir := "../"
 
 	cmd := exec.Command("make", "test-setup")
@@ -31,6 +32,14 @@ func setup() {
 	if err != nil {
 		panic(err)
 	}
+
+	cfg := models.DefaultPostgesTestConfig()
+	db, err := models.Open(cfg)
+
+	if err != nil {
+		t.Fatalf("failed to connect to test database: %v", err)
+	}
+	return db, err
 }
 
 func teardown() {
