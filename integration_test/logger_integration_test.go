@@ -17,18 +17,18 @@ func TestLoggerMiddleware(t *testing.T) {
 	db, err := models.Open(cfg)
 	defer db.Close()
 
-	// Initialize DBLogger with the test database connection
 	logger := &models.DBLogger{
 		DB: db,
 	}
 
-	timeout := 10 * time.Second
-	waitForPing(db, timeout)
+	err = waitForPing(db, 10*time.Second)
+	if err != nil {
+		t.Errorf("Database timeout: %v", err)
+	}
 
 	handlerFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 	loggerMiddleware := models.LoggerMiddleware(logger)(handlerFunc)
 
-	// Test normal request handling
 	req := httptest.NewRequest("GET", "/", nil)
 	rr := httptest.NewRecorder()
 
@@ -38,7 +38,6 @@ func TestLoggerMiddleware(t *testing.T) {
 		t.Errorf("Expected status code %d, but got %d", http.StatusOK, rr.Code)
 	}
 
-	// Verify no error logs were stored
 	errorLogsCount, err := getErrorLogsCount(db)
 	if err != nil {
 		t.Errorf("Error: %v", err)
@@ -47,7 +46,6 @@ func TestLoggerMiddleware(t *testing.T) {
 		t.Errorf("Expected error logs count: 0, but got %d", errorLogsCount)
 	}
 
-	// Test panic handling
 	panickingHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		panic("Something went wrong!")
 	})
@@ -62,7 +60,6 @@ func TestLoggerMiddleware(t *testing.T) {
 		t.Errorf("Expected status code %d, but got %d", http.StatusInternalServerError, rr.Code)
 	}
 
-	// Verify error log was stored
 	errorLogsCount, err = getErrorLogsCount(db)
 	if err != nil {
 		t.Errorf("Unexpected error getting logs")

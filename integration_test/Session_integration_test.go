@@ -21,7 +21,10 @@ func TestCreateSession(t *testing.T) {
 
 	sessionService := &models.SessionService{DB: db}
 
-	waitForPing(db, 10*time.Second)
+	err = waitForPing(db, 10*time.Second)
+	if err != nil {
+		t.Errorf("Database timeout: %v", err)
+	}
 
 	_, err = db.Exec("DELETE FROM sessions")
 	if err != nil {
@@ -97,7 +100,10 @@ func TestGetUserByToken(t *testing.T) {
 
 	sessionService := &models.SessionService{DB: db}
 
-	waitForPing(db, 10*time.Second)
+	err = waitForPing(db, 10*time.Second)
+	if err != nil {
+		t.Errorf("Database timeout: %v", err)
+	}
 
 	userID := 1
 	email := "test@example.com"
@@ -148,7 +154,11 @@ func TestDeleteSession(t *testing.T) {
 
 	sessionService := &models.SessionService{DB: db}
 
-	waitForPing(db, 10*time.Second)
+	err = waitForPing(db, 10*time.Second)
+	if err != nil {
+		t.Errorf("Database timeout: %v", err)
+	}
+
 	token := "testtoken"
 	tokenHash := models.Hash(token)
 	_, err = db.Exec("INSERT INTO sessions (token_hash) VALUES ($1)", tokenHash)

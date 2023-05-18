@@ -21,6 +21,9 @@ func TestOpen(t *testing.T) {
 	}
 
 	// Retry connection for up to 10 seconds with 1-second intervals
-	timeout := 10 * time.Second
-	waitForPing(db, timeout)
+
+	err = waitForPing(db, 10*time.Second)
+	if err != nil {
+		t.Errorf("Database timeout: %v", err)
+	}
 }
