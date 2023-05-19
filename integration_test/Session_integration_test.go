@@ -24,11 +24,6 @@ func TestCreateSession(t *testing.T) {
 		t.Errorf("Database timeout: %v", err)
 	}
 
-	_, err = db.Exec("DELETE FROM sessions")
-	if err != nil {
-		t.Fatalf("failed to clean up sessions table: %v", err)
-	}
-
 	userID := 1
 	session, err := sessionService.Create(userID)
 	if err != nil {
