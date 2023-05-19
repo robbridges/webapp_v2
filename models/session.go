@@ -91,7 +91,7 @@ func (ss *SessionService) DeleteSession(token string) error {
 	WHERE token_hash = $1
 	`, tokenHash)
 	if err != nil {
-		return fmt.Errorf("Signout: %w", err)
+		return fmt.Errorf("signout: %w", err)
 	}
 	return nil
 }

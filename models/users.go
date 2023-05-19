@@ -68,8 +68,7 @@ func (us *UserService) Authenticate(email, password string) (*User, error) {
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 
 	if err != nil {
-		fmt.Errorf("compare() error: %v", err)
-		return nil, fmt.Errorf("authenticate: %w", err)
+		return nil, fmt.Errorf("compare() error: %v", err)
 	}
 
 	return &user, nil

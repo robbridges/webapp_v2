@@ -15,7 +15,7 @@ type tokenManager struct {
 
 func (tm *tokenManager) New() (string, error) {
 	bytesPerToken := tm.BytesPerToken
-	// Check what Bytes per Token is set 0, if not set or less than the min bytes we over ride it to the min bytes.
+	// Check what Bytes per Token is set 0, if not set or less than the min bytes we override it to the min bytes.
 	if bytesPerToken < MinBytesPerToken {
 		bytesPerToken = MinBytesPerToken
 	}
