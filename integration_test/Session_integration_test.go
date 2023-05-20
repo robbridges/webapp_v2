@@ -18,13 +18,24 @@ func TestCreateSession(t *testing.T) {
 	defer teardown()
 
 	sessionService := &models.SessionService{DB: db}
+	userService := &models.UserService{DB: db}
 
 	err = waitForPing(db, 10*time.Second)
 	if err != nil {
 		t.Errorf("Database timeout: %v", err)
 	}
 
-	userID := 1
+	user := &models.User{
+		Email:        "test@example.com",
+		PasswordHash: "password_hash",
+	}
+	err = userService.InsertUser(user)
+	if err != nil {
+		t.Fatalf("failed to insert user: %v", err)
+	}
+
+	userID := user.ID
+
 	session, err := sessionService.Create(userID)
 	if err != nil {
 		t.Fatalf("failed to create session: %v", err)

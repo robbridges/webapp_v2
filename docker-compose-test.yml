@@ -15,7 +15,6 @@ services:
       - 5433:5432 # format here is "port on our machine":"port on container"
     networks:
       - integration_test_network
-
 networks:
   integration_test_network:
     name: integration_test_network
