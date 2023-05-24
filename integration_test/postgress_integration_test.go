@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"database/sql"
+	"fmt"
 	"testing"
 )
 
@@ -26,7 +27,6 @@ func TestMigrate(t *testing.T) {
 	defer deferDBClose(db, &err)
 	defer teardown(t)
 
-	err = dropTableIfExists(db)
 	if err != nil {
 		t.Fatalf("Failed to drop table: %v", err)
 	}
@@ -35,9 +35,19 @@ func TestMigrate(t *testing.T) {
 		t.Fatalf("Error creating table: %v", err)
 	}
 
+	tableExists := tableExists(db, "users")
+	if !tableExists {
+		t.Error("Expected 'users' table to exist after migration, but it doesn't.")
+	}
+
 }
 
-func dropTableIfExists(db *sql.DB) error {
-	_, err := db.Exec("DROP TABLE IF EXISTS users CASCADE")
-	return err
+func tableExists(db *sql.DB, tableName string) bool {
+	var exists bool
+	query := fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '%s')", tableName)
+	err := db.QueryRow(query).Scan(&exists)
+	if err != nil {
+		return false
+	}
+	return exists
 }
