@@ -28,16 +28,16 @@ func TestMigrate(t *testing.T) {
 	defer teardown(t)
 
 	if err != nil {
-		t.Fatalf("Failed to drop table: %v", err)
+		t.Errorf("Failed to drop table: %v", err)
 	}
 
 	if err != nil {
-		t.Fatalf("Error creating table: %v", err)
+		t.Errorf("Error creating table: %v", err)
 	}
 
 	tableExists := tableExists(db, "users")
 	if !tableExists {
-		t.Error("Expected 'users' table to exist after migration, but it doesn't.")
+		t.Errorf("expected users table to exist: %v", err)
 	}
 
 }
