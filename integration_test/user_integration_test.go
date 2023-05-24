@@ -15,7 +15,7 @@ func TestUserService_Create(t *testing.T) {
 		t.Fatalf("failed to connect to test database: %v", err)
 	}
 	defer deferDBClose(db, &err)
-	defer teardown()
+	defer teardown(t)
 
 	us := &models.UserService{DB: db}
 
@@ -66,7 +66,7 @@ func TestUserService_Authenticate(t *testing.T) {
 	}
 
 	defer deferDBClose(db, &err)
-	defer teardown()
+	defer teardown(t)
 
 	us := &models.UserService{DB: db}
 

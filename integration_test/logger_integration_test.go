@@ -15,7 +15,7 @@ func TestLoggerMiddleware(t *testing.T) {
 	db, err := setup(t)
 
 	defer deferDBClose(db, &err)
-	defer teardown()
+	defer teardown(t)
 
 	logger := &models.DBLogger{
 		DB: db,

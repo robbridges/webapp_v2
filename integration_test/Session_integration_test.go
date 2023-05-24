@@ -15,7 +15,7 @@ func TestCreateSession(t *testing.T) {
 		t.Fatalf("failed to connect to test database: %v", err)
 	}
 	defer deferDBClose(db, &err)
-	defer teardown()
+	defer teardown(t)
 
 	sessionService := &models.SessionService{DB: db}
 	userService := &models.UserService{DB: db}
@@ -98,14 +98,9 @@ func TestGetUserByToken(t *testing.T) {
 	}
 
 	defer deferDBClose(db, &err)
-	defer teardown()
+	defer teardown(t)
 
 	sessionService := &models.SessionService{DB: db}
-
-	err = waitForPing(db, 10*time.Second)
-	if err != nil {
-		t.Errorf("Database timeout: %v", err)
-	}
 
 	userID := 1
 	email := "test@example.com"
@@ -140,6 +135,7 @@ func TestGetUserByToken(t *testing.T) {
 	if err == nil {
 		t.Error("expected an error when getting user by invalid token")
 	}
+
 }
 
 func TestDeleteSession(t *testing.T) {
@@ -150,7 +146,7 @@ func TestDeleteSession(t *testing.T) {
 	}
 
 	defer deferDBClose(db, &err)
-	defer teardown()
+	defer teardown(t)
 
 	sessionService := &models.SessionService{DB: db}
 

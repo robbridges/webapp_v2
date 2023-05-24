@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/pressly/goose/v3"
 	"github.com/robbridges/webapp_v2/models"
 	"github.com/spf13/viper"
 	"log"
@@ -35,14 +36,20 @@ func setup(t *testing.T) (*sql.DB, error) {
 
 	cfg := models.DefaultPostgesTestConfig()
 	db, err := models.Open(cfg)
-
+	err = waitForPing(db, 10*time.Second)
+	if err != nil {
+		t.Errorf("Database never responded")
+	}
+	err = migrateUp(t)
 	if err != nil {
 		t.Fatalf("failed to connect to test database: %v", err)
 	}
 	return db, err
 }
 
-func teardown() {
+func teardown(t *testing.T) {
+	migrateDown(t)
+
 	dir := "../"
 
 	cmd := exec.Command("make", "test-teardown")
@@ -53,6 +60,34 @@ func teardown() {
 		panic(err)
 	}
 
+}
+
+func migrateUp(t *testing.T) error {
+	cfg := models.DefaultPostgesTestConfig()
+	db, err := models.Open(cfg)
+	if err != nil {
+
+		return err
+	}
+	err = models.Migrate(db, "../migrations")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func migrateDown(t *testing.T) error {
+	cfg := models.DefaultPostgesTestConfig()
+	db, err := models.Open(cfg)
+	if err != nil {
+
+		return err
+	}
+	err = goose.Down(db, "../migrations")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func waitForPing(db *sql.DB, timeout time.Duration) error {

@@ -5,8 +5,8 @@ services:
   integrationdb: # The service will be named db.
     image: postgres # The postgres image will be used
     restart: always # Always try to restart if this stops running
-    volumes:
-      - ./models/sql:/docker-entrypoint-initdb.d/
+#    volumes:
+#      - ./models/sql:/docker-entrypoint-initdb.d/
     environment: # Provide environment variables
       POSTGRES_USER: dev # POSTGRES_USER env var w/ value rob
       POSTGRES_PASSWORD: test
