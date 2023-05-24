@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/pressly/goose/v3"
 	"github.com/spf13/viper"
 )
 
@@ -53,4 +54,16 @@ func DefaultPostgesTestConfig() PostgressConfig {
 func (cfg PostgressConfig) String() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Database, cfg.SSLMODE)
+}
+
+func Migrate(db *sql.DB, dir string) error {
+	err := goose.SetDialect("postgres")
+	if err != nil {
+		return fmt.Errorf("Migrate: %v", err)
+	}
+	err = goose.Up(db, dir)
+	if err != nil {
+		return fmt.Errorf("Migrate: %v", err)
+	}
+	return nil
 }
