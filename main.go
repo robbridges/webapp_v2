@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/csrf"
 	"github.com/robbridges/webapp_v2/controllers"
+	"github.com/robbridges/webapp_v2/migrations"
 	"github.com/robbridges/webapp_v2/models"
 	"github.com/robbridges/webapp_v2/rand"
 	"github.com/robbridges/webapp_v2/templates"
@@ -49,7 +50,7 @@ func main() {
 	}
 	defer db.Close()
 
-	err = models.Migrate(db, "migrations")
+	err = models.MigrateFS(db, migrations.FS, ".")
 	if err != nil {
 		panic("Error migrating, app closing")
 	}
