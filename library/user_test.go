@@ -1,4 +1,4 @@
-package integration_test
+package library
 
 import (
 	"github.com/robbridges/webapp_v2/models"
