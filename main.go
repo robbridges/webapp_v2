@@ -72,6 +72,10 @@ func main() {
 		SessionService: &sessionService,
 	}
 
+	umw := controllers.UserMiddleware{
+		SessionService: &sessionService,
+	}
+
 	usersC.Templates.New = signupTpl
 	usersC.Templates.SignIn = signInTpl
 	usersC.Templates.CurrentUser = currentUserTpl
@@ -85,6 +89,10 @@ func main() {
 
 	r.Use(models.LoggerMiddleware(logger))
 	r.Use(csrfMw)
+	r.Use(func(next http.Handler) http.Handler {
+		fn := umw.SetUser(next)
+		return fn
+	})
 
 	r.Get("/", controllers.StaticHandler(homeTpl))
 	r.Get("/contact", controllers.StaticHandler(contactTpl))

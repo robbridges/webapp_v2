@@ -222,16 +222,6 @@ func TestUsers_ProcessSignIn(t *testing.T) {
 			t.Errorf("unexpected userID in request context: got %v, want nil", userID)
 		}
 
-		// Assert error was logged
-		if len(mockLogger.ErrorLog) != 2 {
-			t.Fatalf("unexpected number of errors logged: got %v, want %v", len(mockLogger.ErrorLog), 1)
-		}
-		err := mockLogger.ErrorLog[0].Error()
-		expectedErr := "http: named cookie not present"
-		if !strings.Contains(err, expectedErr) {
-			t.Errorf("unexpected error message: got %v, want %v", err, expectedErr)
-		}
-
 		if len(w.Header()["Set-Cookie"]) == 0 {
 			t.Errorf("cookie not deleted: got no cookie")
 		}
@@ -358,16 +348,6 @@ func TestUsers_CurrentUser(t *testing.T) {
 		userID, ok := r.Context().Value("userID").(int)
 		if ok {
 			t.Errorf("unexpected userID in request context: got %v, want nil", userID)
-		}
-
-		// Assert error was logged
-		if len(mockLogger.ErrorLog) != 2 {
-			t.Fatalf("unexpected number of errors logged: got %v, want 1", len(mockLogger.ErrorLog))
-		}
-		err := mockLogger.ErrorLog[0].Error()
-		expectedErr := "http: named cookie not present"
-		if !strings.Contains(err, expectedErr) {
-			t.Errorf("unexpected error message: got %v, want %v", err, expectedErr)
 		}
 
 		// Assert cookie was deleted

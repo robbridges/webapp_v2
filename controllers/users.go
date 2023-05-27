@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/robbridges/webapp_v2/context"
 	"github.com/robbridges/webapp_v2/models"
 	"net/http"
 )
@@ -14,6 +15,10 @@ type Users struct {
 	}
 	UserService    models.UserServiceInterface
 	SessionService models.SessionServiceInterface
+}
+
+type UserMiddleware struct {
+	SessionService *models.SessionService
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
@@ -65,21 +70,27 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	logger := r.Context().Value("logger").(models.LogInterface)
-	tokenCookie, err := readCookie(r, CookieSession)
-	if err != nil {
-		logger.Create(err)
-		fmt.Println(err)
+	user := context.User(r.Context())
+	if user == nil {
 		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
-	user, err := u.SessionService.User(tokenCookie)
-	if err != nil {
-		logger.Create(err)
-		fmt.Println(err)
-		http.Redirect(w, r, "/signin", http.StatusFound)
-		return
-	}
+	//logger := r.Context().Value("logger").(models.LogInterface)
+	//
+	//tokenCookie, err := readCookie(r, CookieSession)
+	//if err != nil {
+	//	logger.Create(err)
+	//	fmt.Println(err)
+	//	http.Redirect(w, r, "/signin", http.StatusFound)
+	//	return
+	//}
+	//user, err := u.SessionService.User(tokenCookie)
+	//if err != nil {
+	//	logger.Create(err)
+	//	fmt.Println(err)
+	//	http.Redirect(w, r, "/signin", http.StatusFound)
+	//	return
+	//}
 	var data struct {
 		Email string
 	}
@@ -129,4 +140,30 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	}
 	deleteCookie(w, CookieSession)
 	http.Redirect(w, r, "/signin", http.StatusFound)
+}
+
+func (umw UserMiddleware) SetUser(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		token, err := readCookie(r, CookieSession)
+		if err != nil {
+
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		user, err := umw.SessionService.User(token)
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx := r.Context()
+
+		ctx = context.WithUser(ctx, user)
+
+		r = r.WithContext(ctx)
+
+		next.ServeHTTP(w, r)
+	}
 }
