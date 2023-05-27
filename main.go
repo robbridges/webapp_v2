@@ -42,7 +42,6 @@ func main() {
 	currentUserTpl := views.Must(views.ParseFS(templates.FS, "currentuser.gohtml", "tailwind.gohtml"))
 
 	cfg := models.DefaultPostgresConfig()
-	fmt.Println(cfg.String())
 	db, err := models.Open(cfg)
 
 	if err != nil {
@@ -89,10 +88,7 @@ func main() {
 
 	r.Use(models.LoggerMiddleware(logger))
 	r.Use(csrfMw)
-	r.Use(func(next http.Handler) http.Handler {
-		fn := umw.SetUser(next)
-		return fn
-	})
+	r.Use(umw.SetUser)
 
 	r.Get("/", controllers.StaticHandler(homeTpl))
 	r.Get("/contact", controllers.StaticHandler(contactTpl))
@@ -103,7 +99,11 @@ func main() {
 	r.Get("/signin", usersC.SignIn)
 	r.Post("/signin", usersC.ProcessSignIn)
 	r.Post("/signout", usersC.ProcessSignOut)
-	r.Get("/currentuser", usersC.CurrentUser)
+	r.Route("/currentuser", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/", usersC.CurrentUser)
+	})
 	r.NotFound(notFound)
+
 	svr.ListenAndServe()
 }
