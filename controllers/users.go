@@ -75,22 +75,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
-	//logger := r.Context().Value("logger").(models.LogInterface)
-	//
-	//tokenCookie, err := readCookie(r, CookieSession)
-	//if err != nil {
-	//	logger.Create(err)
-	//	fmt.Println(err)
-	//	http.Redirect(w, r, "/signin", http.StatusFound)
-	//	return
-	//}
-	//user, err := u.SessionService.User(tokenCookie)
-	//if err != nil {
-	//	logger.Create(err)
-	//	fmt.Println(err)
-	//	http.Redirect(w, r, "/signin", http.StatusFound)
-	//	return
-	//}
+
 	var data struct {
 		Email string
 	}
