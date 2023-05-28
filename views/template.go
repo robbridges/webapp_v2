@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/gorilla/csrf"
+	"github.com/robbridges/webapp_v2/context"
+	"github.com/robbridges/webapp_v2/models"
 	"html/template"
 	"io"
 	"io/fs"
@@ -29,6 +31,9 @@ func ParseFS(fs fs.FS, pattern ...string) (Template, error) {
 		"csrfField": func() (template.HTML, error) {
 			return "", fmt.Errorf("csrf function not implmented")
 		},
+		"currentUser": func() (template.HTML, error) {
+			return "", fmt.Errorf("current user not implemented")
+		},
 	})
 	tpl, err := tpl.ParseFS(fs, pattern...)
 	if err != nil {
@@ -52,6 +57,9 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 	tpl.Funcs(template.FuncMap{
 		"csrfField": func() template.HTML {
 			return csrf.TemplateField(r)
+		},
+		"currentUser": func() *models.User {
+			return context.User(r.Context())
 		},
 	})
 
