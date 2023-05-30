@@ -1,4 +1,4 @@
-package library
+package integration_tests
 
 import (
 	"database/sql"

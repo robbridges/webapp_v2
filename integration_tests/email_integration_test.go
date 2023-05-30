@@ -1,4 +1,4 @@
-package library
+package integration_tests
 
 import (
 	"github.com/robbridges/webapp_v2/models"
@@ -19,10 +19,8 @@ func TestSendEmail(t *testing.T) {
 		Password: viper.GetString("EMAIL_PASSWORD"),
 	}
 
-	// Create an instance of EmailService
 	emailService := models.NewEmailService(cfg)
 
-	// Create a test Email object
 	testEmail := models.Email{
 		To:        "admin@gallery.com",
 		Subject:   "Test Email",
@@ -30,10 +28,8 @@ func TestSendEmail(t *testing.T) {
 		HTML:      "<p>This is the HTML content</p>",
 	}
 
-	// Call the SendEmail function
 	err := emailService.SendEmail(testEmail)
 
-	// Perform assertions to verify the result
 	if err != nil {
 		t.Fatalf("Error sending email: %v", err)
 	}
