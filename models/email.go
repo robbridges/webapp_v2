@@ -12,7 +12,7 @@ const (
 type EmailService struct {
 	DefaultSender string
 
-	dialer *mail.Dialer
+	Dialer *mail.Dialer
 }
 
 type Email struct {
@@ -32,7 +32,7 @@ type SMTPConfig struct {
 
 func NewEmailService(config SMTPConfig) *EmailService {
 	es := EmailService{
-		dialer: mail.NewDialer(config.HOST, config.Port, config.Username, config.Password),
+		Dialer: mail.NewDialer(config.HOST, config.Port, config.Username, config.Password),
 	}
 
 	return &es
@@ -54,7 +54,7 @@ func (es *EmailService) SendEmail(email Email) error {
 		msg.AddAlternative("text/html", email.HTML)
 	}
 
-	err := es.dialer.DialAndSend(msg)
+	err := es.Dialer.DialAndSend(msg)
 	if err != nil {
 		return fmt.Errorf("send: %w", err)
 	}

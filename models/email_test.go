@@ -11,7 +11,7 @@ func TestNewEmailService(t *testing.T) {
 	}
 
 	es := NewEmailService(mockConfig)
-	if es.dialer == nil {
+	if es.Dialer == nil {
 		t.Errorf("Dialer should not be nil")
 	}
 }
