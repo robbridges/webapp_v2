@@ -44,7 +44,7 @@ func TestSetFrom(t *testing.T) {
 			name:            "Email has no 'From' field, default sender is not set",
 			defaultSender:   "",
 			emailFrom:       "",
-			expectedResults: []string{"support@webgallery.com"},
+			expectedResults: []string{DefaultSender},
 		},
 	}
 
