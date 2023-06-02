@@ -15,7 +15,9 @@ type PasswordReset struct {
 }
 
 type PasswordResetService struct {
-	DB            *sql.DB
+	DB *sql.DB
+	//Same as the session service, if this value is not set, or is less than the min constant in the Token package it
+	// will automatically be set to 32
 	BytesPerToken int
 	Duration      time.Duration
 }
