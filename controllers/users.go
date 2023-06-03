@@ -5,16 +5,21 @@ import (
 	"github.com/robbridges/webapp_v2/context"
 	"github.com/robbridges/webapp_v2/models"
 	"net/http"
+	"net/url"
 )
 
 type Users struct {
 	Templates struct {
-		New         Template
-		SignIn      Template
-		CurrentUser Template
+		New            Template
+		SignIn         Template
+		CurrentUser    Template
+		ForgotPassword Template
+		CheckYourEmail Template
 	}
-	UserService    models.UserServiceInterface
-	SessionService models.SessionServiceInterface
+	UserService          models.UserServiceInterface
+	SessionService       models.SessionServiceInterface
+	PasswordResetService models.PasswordResetService
+	EmailService         models.EmailService
 }
 
 type UserMiddleware struct {
@@ -51,13 +56,19 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	data.Password = r.FormValue("password")
 	user, err := u.UserService.Authenticate(data.Email, data.Password)
 	if err != nil {
-		logger.Create(err)
+		err = logger.Create(err)
+		if err != nil {
+			fmt.Println("Err creating log ")
+		}
 		http.Error(w, "Something went wrong", http.StatusBadRequest)
 	}
 
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
-		logger.Create(err)
+		err = logger.Create(err)
+		if err != nil {
+			fmt.Println("Err creating log ")
+		}
 		fmt.Println(err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
@@ -91,14 +102,20 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	user, err := u.UserService.Create(email, password)
 	if err != nil {
-		logger.Create(err)
+		err = logger.Create(err)
+		if err != nil {
+			fmt.Println("Err creating log ")
+		}
 		fmt.Println(err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
-		logger.Create(err)
+		err = logger.Create(err)
+		if err != nil {
+			fmt.Println("Err creating log ")
+		}
 		fmt.Println(err)
 		//TODO: Long term there's a better way to handle this without a confusing redirect
 		http.Redirect(w, r, "/signin", http.StatusFound)
@@ -112,15 +129,21 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(models.LogInterface)
 	token, err := readCookie(r, CookieSession)
 	if err != nil {
-		logger.Create(err)
+		err = logger.Create(err)
+		if err != nil {
+			fmt.Println("Err creating log ")
+		}
 		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
 
 	err = u.SessionService.DeleteSession(token)
 	if err != nil {
-		logger.Create(err)
-		fmt.Errorf("delete session %w", err)
+		err = logger.Create(err)
+		if err != nil {
+			fmt.Println("Err creating log ")
+		}
+
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 	}
 	deleteCookie(w, CookieSession)
@@ -151,6 +174,50 @@ func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Email string
+	}
+
+	data.Email = r.FormValue("email")
+	u.Templates.ForgotPassword.Execute(w, r, data)
+}
+
+func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
+	logger := r.Context().Value("logger").(models.LogInterface)
+	var data struct {
+		Email string
+	}
+
+	data.Email = r.FormValue("email")
+	pwReset, err := u.PasswordResetService.Create(data.Email)
+	if err != nil {
+		// we should address this error better for instance non-existent user
+		err = logger.Create(err)
+		if err != nil {
+			fmt.Println("Err creating log ")
+		}
+		http.Error(w, "Something went wrong, check your credentials", http.StatusInternalServerError)
+		return
+	}
+	vals := url.Values{
+		"token": {pwReset.Token},
+	}
+	resetUrl := "https://www.webgallery.com/reset-pw?" + vals.Encode()
+
+	err = u.EmailService.ForgotPassword(data.Email, resetUrl)
+	if err != nil {
+		err = logger.Create(err)
+		if err != nil {
+			fmt.Println("Err creating log ")
+		}
+		http.Error(w, "Something went wrong.", http.StatusInternalServerError)
+		return
+	}
+	// don't render token her, user needs to confirm email account access
+	u.Templates.CheckYourEmail.Execute(w, r, data)
 }
 
 func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
