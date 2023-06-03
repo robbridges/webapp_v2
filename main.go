@@ -40,6 +40,7 @@ func main() {
 	signupTpl := views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
 	signInTpl := views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
 	currentUserTpl := views.Must(views.ParseFS(templates.FS, "currentuser.gohtml", "tailwind.gohtml"))
+	forgotPasswordTpl := views.Must(views.ParseFS(templates.FS, "forgot_password.gohtml", "tailwind.gohtml"))
 
 	cfg := models.DefaultPostgresConfig()
 	db, err := models.Open(cfg)
@@ -78,6 +79,7 @@ func main() {
 	usersC.Templates.New = signupTpl
 	usersC.Templates.SignIn = signInTpl
 	usersC.Templates.CurrentUser = currentUserTpl
+	usersC.Templates.ForgotPassword = forgotPasswordTpl
 
 	csrfKey := rand.GenerateRandByteSlice()
 	csrfMw := csrf.Protect(csrfKey, csrf.Secure(false))
@@ -99,6 +101,8 @@ func main() {
 	r.Get("/signin", usersC.SignIn)
 	r.Post("/signin", usersC.ProcessSignIn)
 	r.Post("/signout", usersC.ProcessSignOut)
+	r.Get("/forgot-pw", usersC.ForgotPassword)
+	r.Post("/forgot-pw", usersC.ProcessForgotPassword)
 	r.Route("/currentuser", func(r chi.Router) {
 		r.Use(umw.RequireUser)
 		r.Get("/", usersC.CurrentUser)
