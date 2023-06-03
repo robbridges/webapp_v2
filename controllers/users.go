@@ -205,8 +205,13 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	vals := url.Values{
 		"token": {pwReset.Token},
 	}
-	resetUrl := "https://www.webgallery.com/reset-pw?" + vals.Encode()
 
+	// we actually should let this block the account instead of doing it in a go routine, a user can't move forward until
+	// email has been sent, thought was put into it to make this a backround job in a go routine, but it risks
+	// the user getting a "Check your email" http response before the email was sent if that is behind for whatever
+	// reason. A welcome email would be different.
+
+	resetUrl := "https://www.webgallery.com/reset-pw?" + vals.Encode()
 	err = u.EmailService.ForgotPassword(data.Email, resetUrl)
 	if err != nil {
 		err = logger.Create(err)
