@@ -81,7 +81,7 @@ func main() {
 	usersC.Templates.ForgotPassword = forgotPasswordTpl
 
 	csrfKey := viper.GetString("CSRF_KEY")
-	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false))
+	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(viper.GetBool("CSRF_SECURE")))
 	svr := http.Server{
 		Addr:    ":8080",
 		Handler: r,
