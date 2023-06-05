@@ -1,7 +1,6 @@
 package rand
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
@@ -73,12 +72,4 @@ func TestString(t *testing.T) {
 		t.Errorf("Byte slice not correctly encoded into string")
 	}
 
-}
-
-func TestGenerateRandByteSlice(t *testing.T) {
-	byteSlice1 := GenerateRandByteSlice()
-	byteSlice2 := GenerateRandByteSlice()
-	if bytes.Equal(byteSlice1, byteSlice2) {
-		t.Errorf("The function generated the same byte slice.")
-	}
 }

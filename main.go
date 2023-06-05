@@ -7,7 +7,6 @@ import (
 	"github.com/robbridges/webapp_v2/controllers"
 	"github.com/robbridges/webapp_v2/migrations"
 	"github.com/robbridges/webapp_v2/models"
-	"github.com/robbridges/webapp_v2/rand"
 	"github.com/robbridges/webapp_v2/templates"
 	"github.com/robbridges/webapp_v2/views"
 	"github.com/spf13/viper"
@@ -81,8 +80,8 @@ func main() {
 	usersC.Templates.CurrentUser = currentUserTpl
 	usersC.Templates.ForgotPassword = forgotPasswordTpl
 
-	csrfKey := rand.GenerateRandByteSlice()
-	csrfMw := csrf.Protect(csrfKey, csrf.Secure(false))
+	csrfKey := viper.GetString("CSRF_KEY")
+	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false))
 	svr := http.Server{
 		Addr:    ":8080",
 		Handler: r,

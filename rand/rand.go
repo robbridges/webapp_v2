@@ -31,13 +31,3 @@ func String(n int) (string, error) {
 	}
 	return base64.URLEncoding.EncodeToString(b), nil
 }
-
-// GenerateRandByteSlice is for our csrf byte slice
-func GenerateRandByteSlice() []byte {
-	byteSlice := make([]byte, 32)
-	if _, err := rand.Read(byteSlice); err != nil {
-		fmt.Errorf("error generating byteSlice: %v", err)
-	}
-
-	return byteSlice
-}
