@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"github.com/go-mail/mail/v2"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -24,18 +25,27 @@ type Email struct {
 }
 
 type SMTPConfig struct {
-	HOST     string
+	Host     string
 	Port     int
 	Username string
 	Password string
 }
 
-func NewEmailService(config SMTPConfig) *EmailService {
+func DefaultSMTPConfig() SMTPConfig {
+	return SMTPConfig{
+		Host:     viper.GetString("EMAIL_HOST"),
+		Port:     viper.GetInt("EMAIL_PORT"),
+		Username: viper.GetString("EMAIL_USERNAME"),
+		Password: viper.GetString("EMAIL_PASSWORD"),
+	}
+}
+
+func NewEmailService(config SMTPConfig) EmailService {
 	es := EmailService{
-		Dialer: mail.NewDialer(config.HOST, config.Port, config.Username, config.Password),
+		Dialer: mail.NewDialer(config.Host, config.Port, config.Username, config.Password),
 	}
 
-	return &es
+	return es
 }
 
 func (es *EmailService) SendEmail(email Email) error {

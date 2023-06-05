@@ -9,7 +9,7 @@ import (
 
 func TestNewEmailService(t *testing.T) {
 	mockConfig := SMTPConfig{
-		HOST:     "testhost",
+		Host:     "testhost",
 		Port:     1,
 		Username: "rob",
 		Password: "secret",

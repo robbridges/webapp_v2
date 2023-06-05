@@ -13,7 +13,7 @@ func TestSendEmail(t *testing.T) {
 	}
 
 	cfg := models.SMTPConfig{
-		HOST:     viper.GetString("EMAIL_HOST"),
+		Host:     viper.GetString("EMAIL_HOST"),
 		Port:     viper.GetInt("EMAIL_PORT"),
 		Username: viper.GetString("EMAIL_USERNAME"),
 		Password: viper.GetString("EMAIL_PASSWORD"),
