@@ -54,9 +54,6 @@ func main() {
 		panic("Error migrating, app closing")
 	}
 
-	smtpConfig := models.DefaultSMTPConfig()
-	emailService := models.NewEmailService(smtpConfig)
-
 	userService := models.UserService{
 		DB: db,
 	}
@@ -64,15 +61,22 @@ func main() {
 	sessionService := models.SessionService{
 		DB: db,
 	}
+	pwResetService := models.PasswordResetService{
+		DB: db,
+	}
+
+	smtpConfig := models.DefaultSMTPConfig()
+	emailService := models.NewEmailService(smtpConfig)
 
 	logger := &models.DBLogger{
 		DB: db,
 	}
 
 	usersC := controllers.Users{
-		UserService:    &userService,
-		SessionService: &sessionService,
-		EmailService:   emailService,
+		UserService:          &userService,
+		SessionService:       &sessionService,
+		EmailService:         *emailService,
+		PasswordResetService: pwResetService,
 	}
 
 	umw := controllers.UserMiddleware{
