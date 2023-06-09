@@ -34,6 +34,7 @@ func TestNew(t *testing.T) {
 			CurrentUser    Template
 			ForgotPassword Template
 			CheckYourEmail Template
+			ResetPassword  Template
 		}{
 			New: mockTemplate,
 		},
@@ -55,19 +56,20 @@ func TestSignIn(t *testing.T) {
 	mockSignInTemplate := &MockTemplate{}
 	mockSignInTemplate.ExecuteFunc = func(w http.ResponseWriter, r *http.Request, data interface{}) {}
 
-	u := Users{
+	users := Users{
 		Templates: struct {
 			New            Template
 			SignIn         Template
 			CurrentUser    Template
 			ForgotPassword Template
 			CheckYourEmail Template
+			ResetPassword  Template
 		}{
 			SignIn: mockSignInTemplate,
 		},
 	}
 
-	u.SignIn(w, r)
+	users.SignIn(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("got status %d, want %d", w.Code, http.StatusOK)
@@ -99,6 +101,7 @@ func TestUsers_ProcessSignIn(t *testing.T) {
 			CurrentUser    Template
 			ForgotPassword Template
 			CheckYourEmail Template
+			ResetPassword  Template
 		}{},
 		UserService:    mockUserService,
 		SessionService: mockSessionService,
@@ -194,6 +197,7 @@ func TestUsers_ProcessSignIn(t *testing.T) {
 				CurrentUser    Template
 				ForgotPassword Template
 				CheckYourEmail Template
+				ResetPassword  Template
 			}{},
 			UserService:    mockUserService,
 			SessionService: mockSessionService,
@@ -274,6 +278,7 @@ func TestUsers_CurrentUser(t *testing.T) {
 			CurrentUser    Template
 			ForgotPassword Template
 			CheckYourEmail Template
+			ResetPassword  Template
 		}{},
 		UserService:    mockUserService,
 		SessionService: mockSessionService,
@@ -380,6 +385,7 @@ func TestUsers_Create(t *testing.T) {
 			CurrentUser    Template
 			ForgotPassword Template
 			CheckYourEmail Template
+			ResetPassword  Template
 		}{},
 		UserService:    mockUserService,
 		SessionService: mockSessionService,
@@ -518,6 +524,7 @@ func TestUsers_ProcessSignOut(t *testing.T) {
 			CurrentUser    Template
 			ForgotPassword Template
 			CheckYourEmail Template
+			ResetPassword  Template
 		}{},
 		SessionService: mockSessionService,
 	}

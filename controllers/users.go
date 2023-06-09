@@ -15,6 +15,7 @@ type Users struct {
 		CurrentUser    Template
 		ForgotPassword Template
 		CheckYourEmail Template
+		ResetPassword  Template
 	}
 	UserService          models.UserServiceInterface
 	SessionService       models.SessionServiceInterface
@@ -234,4 +235,43 @@ func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (u Users) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Token string
+	}
+
+	data.Token = r.FormValue("token")
+	u.Templates.ResetPassword.Execute(w, r, data)
+}
+
+func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
+	logger := r.Context().Value("logger").(models.LogInterface)
+	var data struct {
+		Token    string
+		Password string
+	}
+
+	data.Token = r.FormValue("token")
+	data.Password = r.FormValue("password")
+
+	user, err := u.PasswordResetService.Consume(data.Token)
+	if err != nil {
+		logger.Create(err)
+		http.Error(w, "Somewent went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	//Todo update user password.
+
+	session, err := u.SessionService.Create(user.ID)
+	if err != nil {
+		logger.Create(err)
+		http.Redirect(w, r, "/signin", http.StatusFound)
+	}
+
+	setCookie(w, CookieSession, session.Token)
+
+	http.Redirect(w, r, "/users/me", http.StatusFound)
 }
