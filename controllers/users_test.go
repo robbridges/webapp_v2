@@ -29,9 +29,11 @@ func TestNew(t *testing.T) {
 	// create instance of Users with mock dependencies
 	users := Users{
 		Templates: struct {
-			New         Template
-			SignIn      Template
-			CurrentUser Template
+			New            Template
+			SignIn         Template
+			CurrentUser    Template
+			ForgotPassword Template
+			CheckYourEmail Template
 		}{
 			New: mockTemplate,
 		},
@@ -55,9 +57,11 @@ func TestSignIn(t *testing.T) {
 
 	u := Users{
 		Templates: struct {
-			New         Template
-			SignIn      Template
-			CurrentUser Template
+			New            Template
+			SignIn         Template
+			CurrentUser    Template
+			ForgotPassword Template
+			CheckYourEmail Template
 		}{
 			SignIn: mockSignInTemplate,
 		},
@@ -90,9 +94,11 @@ func TestUsers_ProcessSignIn(t *testing.T) {
 
 	users := Users{
 		Templates: struct {
-			New         Template
-			SignIn      Template
-			CurrentUser Template
+			New            Template
+			SignIn         Template
+			CurrentUser    Template
+			ForgotPassword Template
+			CheckYourEmail Template
 		}{},
 		UserService:    mockUserService,
 		SessionService: mockSessionService,
@@ -183,9 +189,11 @@ func TestUsers_ProcessSignIn(t *testing.T) {
 
 		users := Users{
 			Templates: struct {
-				New         Template
-				SignIn      Template
-				CurrentUser Template
+				New            Template
+				SignIn         Template
+				CurrentUser    Template
+				ForgotPassword Template
+				CheckYourEmail Template
 			}{},
 			UserService:    mockUserService,
 			SessionService: mockSessionService,
@@ -261,9 +269,11 @@ func TestUsers_CurrentUser(t *testing.T) {
 
 	users := Users{
 		Templates: struct {
-			New         Template
-			SignIn      Template
-			CurrentUser Template
+			New            Template
+			SignIn         Template
+			CurrentUser    Template
+			ForgotPassword Template
+			CheckYourEmail Template
 		}{},
 		UserService:    mockUserService,
 		SessionService: mockSessionService,
@@ -365,9 +375,11 @@ func TestUsers_Create(t *testing.T) {
 
 	users := Users{
 		Templates: struct {
-			New         Template
-			SignIn      Template
-			CurrentUser Template
+			New            Template
+			SignIn         Template
+			CurrentUser    Template
+			ForgotPassword Template
+			CheckYourEmail Template
 		}{},
 		UserService:    mockUserService,
 		SessionService: mockSessionService,
@@ -501,9 +513,11 @@ func TestUsers_ProcessSignOut(t *testing.T) {
 
 	users := Users{
 		Templates: struct {
-			New         Template
-			SignIn      Template
-			CurrentUser Template
+			New            Template
+			SignIn         Template
+			CurrentUser    Template
+			ForgotPassword Template
+			CheckYourEmail Template
 		}{},
 		SessionService: mockSessionService,
 	}
