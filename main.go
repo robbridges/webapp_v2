@@ -40,6 +40,7 @@ func main() {
 	signInTpl := views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
 	currentUserTpl := views.Must(views.ParseFS(templates.FS, "currentuser.gohtml", "tailwind.gohtml"))
 	forgotPasswordTpl := views.Must(views.ParseFS(templates.FS, "forgot_password.gohtml", "tailwind.gohtml"))
+	checkEmailTpl := views.Must(views.ParseFS(templates.FS, "checkyouremail.gohtml", "tailwind.gohtml"))
 
 	cfg := models.DefaultPostgresConfig()
 	db, err := models.Open(cfg)
@@ -87,6 +88,7 @@ func main() {
 	usersC.Templates.SignIn = signInTpl
 	usersC.Templates.CurrentUser = currentUserTpl
 	usersC.Templates.ForgotPassword = forgotPasswordTpl
+	usersC.Templates.CheckYourEmail = checkEmailTpl
 
 	csrfKey := viper.GetString("CSRF_KEY")
 	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(viper.GetBool("CSRF_SECURE")))
