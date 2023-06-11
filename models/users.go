@@ -11,6 +11,7 @@ import (
 type UserServiceInterface interface {
 	Create(email, password string) (*User, error)
 	Authenticate(email, password string) (*User, error)
+	UpdatePassword(int, string) error
 }
 
 type MockUserService struct {
@@ -82,6 +83,23 @@ func (us *UserService) InsertUser(user *User) error {
 	if err := row.Scan(&user.ID); err != nil {
 		return fmt.Errorf("failed to insert user: %w", err)
 	}
+	return nil
+}
+
+func (us *UserService) UpdatePassword(userID int, password string) error {
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("update password: %w", err)
+	}
+	passwordHash := string(hashedBytes)
+	_, err = us.DB.Exec(`
+	UPDATE users
+	SET password_hash = $2
+	WHERE id = $1;`, userID, passwordHash)
+	if err != nil {
+		return fmt.Errorf("update password: %w", err)
+	}
+
 	return nil
 }
 
