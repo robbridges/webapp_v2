@@ -77,7 +77,42 @@ func (svc *PasswordResetService) Create(email string) (*PasswordReset, error) {
 }
 
 func (svc *PasswordResetService) Consume(token string) (*User, error) {
-	return nil, fmt.Errorf("password reset consume: Implement me")
+	tokenHash := svc.hash(token)
+	var user User
+	var pwReset PasswordReset
+	row := svc.DB.QueryRow(`
+		SELECT password_resets.id,
+			password_resets.expires_at,
+			users.id,
+			users.email,
+			users.password_hash
+		FROM password_resets
+			JOIN users ON users.id = password_resets.user_id
+		WHERE password_resets.token_hash = $1;`, tokenHash)
+	err := row.Scan(
+		&pwReset.ID, &pwReset.ExpiresAt,
+		&user.ID, &user.Email, &user.PasswordHash)
+	if err != nil {
+		return nil, fmt.Errorf("consume: %w", err)
+	}
+	if time.Now().After(pwReset.ExpiresAt) {
+		return nil, fmt.Errorf("token expires: %v", token)
+	}
+	err = svc.delete(pwReset.ID)
+	if err != nil {
+		return nil, fmt.Errorf("consume: %w", err)
+	}
+	return &user, nil
+}
+
+func (svc *PasswordResetService) delete(id int) error {
+	_, err := svc.DB.Exec(`
+		DELETE FROM password_resets
+		WHERE id = $1;`, id)
+	if err != nil {
+		return fmt.Errorf("delete: %w", err)
+	}
+	return nil
 }
 
 func (svc *PasswordResetService) hash(token string) string {

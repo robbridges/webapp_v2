@@ -273,5 +273,5 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	setCookie(w, CookieSession, session.Token)
 
-	http.Redirect(w, r, "/users/me", http.StatusFound)
+	http.Redirect(w, r, "/currentuser", http.StatusFound)
 }
