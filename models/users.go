@@ -15,8 +15,9 @@ type UserServiceInterface interface {
 }
 
 type MockUserService struct {
-	AuthenticateFunc func(email, password string) (*User, error)
-	CreateFunc       func(email string, password string) (*User, error)
+	AuthenticateFunc   func(email, password string) (*User, error)
+	CreateFunc         func(email string, password string) (*User, error)
+	UpdatePasswordFunc func(int, string) error
 }
 
 type User struct {
@@ -128,4 +129,11 @@ func (mus *MockUserService) Authenticate(email, password string) (*User, error) 
 		return mus.AuthenticateFunc(email, password)
 	}
 	return nil, errors.New("AuthenticateFunc is not set")
+}
+
+func (mus *MockUserService) UpdatePassword(userId int, email string) error {
+	if mus.UpdatePasswordFunc != nil {
+		return mus.UpdatePasswordFunc(userId, email)
+	}
+	return errors.New("updatePasswordFunc is not set")
 }
