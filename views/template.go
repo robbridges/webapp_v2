@@ -34,6 +34,13 @@ func ParseFS(fs fs.FS, pattern ...string) (Template, error) {
 		"currentUser": func() (template.HTML, error) {
 			return "", fmt.Errorf("current user not implemented")
 		},
+		"errors": func() []string {
+			return []string{
+				"Don't do that",
+				"Hab-yaba-waba!",
+				"Account already exists",
+			}
+		},
 	})
 	tpl, err := tpl.ParseFS(fs, pattern...)
 	if err != nil {
