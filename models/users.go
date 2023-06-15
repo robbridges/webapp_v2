@@ -12,7 +12,7 @@ import (
 
 var (
 	ErrEmailTaken = errors.New("models: email address already in use")
-	ErrNoData     = errors.New("models: email address not found")
+	ErrNoData     = errors.New("create sql: no rows in result set")
 )
 
 type UserServiceInterface interface {
