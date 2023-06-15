@@ -2,6 +2,7 @@ package views
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/gorilla/csrf"
 	"github.com/robbridges/webapp_v2/context"
@@ -15,6 +16,10 @@ import (
 
 type Template struct {
 	HtmlTpl *template.Template
+}
+
+type public interface {
+	Public() string
 }
 
 func Must(t Template, err error) Template {
@@ -57,6 +62,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 		http.Error(w, "There was an error rendering the page", http.StatusInternalServerError)
 		return
 	}
+	errMsgs := errMessages(errs...)
 	tpl.Funcs(template.FuncMap{
 		"csrfField": func() template.HTML {
 			return csrf.TemplateField(r)
@@ -65,12 +71,8 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 			return context.User(r.Context())
 		},
 		"errors": func() []string {
-			var errMessages []string
-			//temp this just needs to work for the time being
-			for _, err := range errs {
-				errMessages = append(errMessages, err.Error())
-			}
-			return errMessages
+
+			return errMsgs
 		},
 	})
 
@@ -83,4 +85,19 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 		return
 	}
 	io.Copy(w, &buf)
+}
+
+func errMessages(errs ...error) []string {
+	var messages []string
+	//temp this just needs to work for the time being
+	for _, err := range errs {
+		var pubErr public
+		if errors.As(err, &pubErr) {
+			messages = append(messages, pubErr.Public())
+		} else {
+			fmt.Println(err)
+			messages = append(messages, "Something went wrong")
+		}
+	}
+	return messages
 }
