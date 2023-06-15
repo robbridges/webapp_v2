@@ -4,8 +4,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgerrcode"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
+)
+
+var (
+	ErrEmailTaken = errors.New("models: email address already in use")
 )
 
 type UserServiceInterface interface {
@@ -82,6 +88,12 @@ func (us *UserService) InsertUser(user *User) error {
 		VALUES ($1, $2) RETURNING id;`, user.Email, user.PasswordHash,
 	)
 	if err := row.Scan(&user.ID); err != nil {
+		var pgError *pgconn.PgError
+		if errors.As(err, &pgError) {
+			if pgError.Code == pgerrcode.UniqueViolation {
+				return ErrEmailTaken
+			}
+		}
 		return fmt.Errorf("failed to insert user: %w", err)
 	}
 	return nil
