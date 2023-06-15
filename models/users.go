@@ -12,6 +12,7 @@ import (
 
 var (
 	ErrEmailTaken = errors.New("models: email address already in use")
+	ErrNoData     = errors.New("models: email address not found")
 )
 
 type UserServiceInterface interface {
@@ -110,6 +111,12 @@ func (us *UserService) UpdatePassword(userID int, password string) error {
 	SET password_hash = $2
 	WHERE id = $1;`, userID, passwordHash)
 	if err != nil {
+		var pgError *pgconn.PgError
+		if errors.As(err, &pgError) {
+			if pgError.Code == pgerrcode.NoData {
+				return ErrNoData
+			}
+		}
 		return fmt.Errorf("update password: %w", err)
 	}
 

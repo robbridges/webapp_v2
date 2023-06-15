@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"github.com/robbridges/webapp_v2/context"
+	puberror "github.com/robbridges/webapp_v2/errors"
 	"github.com/robbridges/webapp_v2/models"
 	"net/http"
 	"net/url"
@@ -109,6 +111,10 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	user, err := u.UserService.Create(data.Email, data.Password)
 	if err != nil {
 		logger.Create(err)
+
+		if errors.Is(err, models.ErrEmailTaken) {
+			err = puberror.Public(err, "That email is already taken")
+		}
 		u.Templates.New.Execute(w, r, data, err)
 		return
 	}
@@ -197,9 +203,9 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	pwReset, err := u.PasswordResetService.Create(data.Email)
 	if err != nil {
 		// we should address this error better for instance non-existent user
-		err = logger.Create(err)
-		if err != nil {
-			fmt.Println("Err creating log ")
+		if errors.Is(err, models.ErrNoData) {
+			err = puberror.Public(err, "this email address was not found")
+			u.Templates.ForgotPassword.Execute(w, r, data, err)
 		}
 		http.Error(w, "Something went wrong, check your credentials", http.StatusInternalServerError)
 		return
