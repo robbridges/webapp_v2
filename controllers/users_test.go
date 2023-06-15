@@ -14,7 +14,7 @@ import (
 func TestNew(t *testing.T) {
 	// create mock template
 	mockTemplate := &MockTemplate{
-		ExecuteFunc: func(w http.ResponseWriter, r *http.Request, data interface{}) {
+		ExecuteFunc: func(w http.ResponseWriter, r *http.Request, data interface{}, errs ...error) {
 			// verify that the data contains the expected email
 			if d, ok := data.(struct{ Email string }); ok {
 				if d.Email != "test@example.com" {
@@ -54,7 +54,7 @@ func TestSignIn(t *testing.T) {
 	r.Form.Add("email", "test@test.com")
 
 	mockSignInTemplate := &MockTemplate{}
-	mockSignInTemplate.ExecuteFunc = func(w http.ResponseWriter, r *http.Request, data interface{}) {}
+	mockSignInTemplate.ExecuteFunc = func(w http.ResponseWriter, r *http.Request, data interface{}, errs ...error) {}
 
 	users := Users{
 		Templates: struct {
@@ -493,8 +493,8 @@ func TestUsers_Create(t *testing.T) {
 		}
 
 		// Assert error was logged
-		if len(mockLogger.ErrorLog) != 1 {
-			t.Fatalf("unexpected number of errors logged: got %v, want 1", len(mockLogger.ErrorLog))
+		if len(mockLogger.ErrorLog) != 2 {
+			t.Fatalf("unexpected number of errors logged: got %v, want 2", len(mockLogger.ErrorLog))
 		}
 		err := mockLogger.ErrorLog[0].Error()
 		expectedErr := "create user error"

@@ -9,7 +9,7 @@ import (
 
 func TestStaticHandler(t *testing.T) {
 	mockTmpl := &MockTemplate{
-		ExecuteFunc: func(w http.ResponseWriter, r *http.Request, data interface{}) {
+		ExecuteFunc: func(w http.ResponseWriter, r *http.Request, data interface{}, errs ...error) {
 			w.Write([]byte("Test"))
 		},
 	}
@@ -31,7 +31,7 @@ func TestStaticHandler(t *testing.T) {
 func TestFAQ(t *testing.T) {
 	t.Run("should execute template with questions", func(t *testing.T) {
 		mockTpl := &MockTemplate{
-			ExecuteFunc: func(w http.ResponseWriter, r *http.Request, data interface{}) {
+			ExecuteFunc: func(w http.ResponseWriter, r *http.Request, data interface{}, errs ...error) {
 				questions, ok := data.([]struct {
 					Question string
 					Answer   template.HTML

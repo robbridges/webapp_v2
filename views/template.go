@@ -35,11 +35,7 @@ func ParseFS(fs fs.FS, pattern ...string) (Template, error) {
 			return "", fmt.Errorf("current user not implemented")
 		},
 		"errors": func() []string {
-			return []string{
-				"Don't do that",
-				"Hab-yaba-waba!",
-				"Account already exists",
-			}
+			return nil
 		},
 	})
 	tpl, err := tpl.ParseFS(fs, pattern...)
@@ -53,7 +49,7 @@ func ParseFS(fs fs.FS, pattern ...string) (Template, error) {
 
 }
 
-func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}) {
+func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}, errs ...error) {
 	// clone the template instead of using the same one every time to prevent data races
 	tpl, err := t.HtmlTpl.Clone()
 	if err != nil {
@@ -67,6 +63,14 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 		},
 		"currentUser": func() *models.User {
 			return context.User(r.Context())
+		},
+		"errors": func() []string {
+			var errMessages []string
+			//temp this just needs to work for the time being
+			for _, err := range errs {
+				errMessages = append(errMessages, err.Error())
+			}
+			return errMessages
 		},
 	})
 
