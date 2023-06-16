@@ -10,11 +10,6 @@ import (
 	"strings"
 )
 
-var (
-	ErrEmailTaken = errors.New("models: email address already in use")
-	ErrNoData     = errors.New("create sql: no rows in result set")
-)
-
 type UserServiceInterface interface {
 	Create(email, password string) (*User, error)
 	Authenticate(email, password string) (*User, error)

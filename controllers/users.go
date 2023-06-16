@@ -202,7 +202,7 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	data.Email = r.FormValue("email")
 	pwReset, err := u.PasswordResetService.Create(data.Email)
 	if err != nil {
-		if err.Error() == "create sql: no rows in result set" {
+		if err.Error() == models.ErrNoData.Error() {
 			err = puberror.Public(err, "That email is already taken")
 			u.Templates.ForgotPassword.Execute(w, r, data, err)
 			return
