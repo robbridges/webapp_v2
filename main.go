@@ -109,7 +109,7 @@ func main() {
 	galleriesC.Templates.New = galleriesNewTpl
 
 	csrfKey := viper.GetString("CSRF_KEY")
-	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(viper.GetBool("CSRF_SECURE")))
+	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(viper.GetBool("CSRF_SECURE")), csrf.Path("/"))
 	svr := http.Server{
 		Addr:    ":8080",
 		Handler: r,
@@ -136,7 +136,12 @@ func main() {
 		r.Use(umw.RequireUser)
 		r.Get("/", usersC.CurrentUser)
 	})
-	r.Get("/galleries/new", galleriesC.New)
+	r.Route("/galleries", func(r chi.Router) {
+		r.Group(func(r chi.Router) {
+			r.Use(umw.RequireUser)
+			r.Get("/new", galleriesC.New)
+		})
+	})
 	r.NotFound(notFound)
 
 	svr.ListenAndServe()
