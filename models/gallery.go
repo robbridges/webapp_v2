@@ -73,3 +73,28 @@ func (svc *GalleryService) ByUserID(userID int) ([]Gallery, error) {
 	}
 	return galleries, nil
 }
+
+func (svc *GalleryService) Update(gallery *Gallery) error {
+	_, err := svc.DB.Exec(`
+		UPDATE galleries
+		SET title = $2
+	 	WHERE ID =$1;`, gallery.ID, gallery.Title,
+	)
+
+	if err != nil {
+		return fmt.Errorf("update gallery: %v", err)
+	}
+
+	return nil
+}
+
+func (svc *GalleryService) Delete(gallery *Gallery) error {
+	_, err := svc.DB.Exec(`
+	DELETE from galleries
+	WHERE id = $1;`, gallery.ID,
+	)
+	if err != nil {
+		return fmt.Errorf("delete gallery: %v", err)
+	}
+	return nil
+}
