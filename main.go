@@ -32,6 +32,7 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 func main() {
 	r := chi.NewRouter()
 
+	//user templates
 	homeTpl := views.Must(views.ParseFS(templates.FS, "home.gohtml", "tailwind.gohtml"))
 	contactTpl := views.Must(views.ParseFS(templates.FS, "contact.gohtml", "tailwind.gohtml"))
 	faqTpl := views.Must(views.ParseFS(templates.FS, "faq.gohtml", "tailwind.gohtml"))
@@ -42,6 +43,9 @@ func main() {
 	forgotPasswordTpl := views.Must(views.ParseFS(templates.FS, "forgot_password.gohtml", "tailwind.gohtml"))
 	checkEmailTpl := views.Must(views.ParseFS(templates.FS, "checkyouremail.gohtml", "tailwind.gohtml"))
 	resetPwTpl := views.Must(views.ParseFS(templates.FS, "reset-password.gohtml", "tailwind.gohtml"))
+
+	//gallery templates
+	galleriesNewTpl := views.Must(views.ParseFS(templates.FS, "galleries/new.gohtml", "tailwind.gohtml"))
 
 	cfg := models.DefaultPostgresConfig()
 	db, err := models.Open(cfg)
@@ -70,6 +74,14 @@ func main() {
 	smtpConfig := models.DefaultSMTPConfig()
 	emailService := models.NewEmailService(smtpConfig)
 
+	galleryService := &models.GalleryService{
+		DB: db,
+	}
+
+	galleriesC := controllers.Galleries{
+		GalleryService: galleryService,
+	}
+
 	logger := &models.DBLogger{
 		DB: db,
 	}
@@ -85,12 +97,16 @@ func main() {
 		SessionService: &sessionService,
 	}
 
+	//user routes
 	usersC.Templates.New = signupTpl
 	usersC.Templates.SignIn = signInTpl
 	usersC.Templates.CurrentUser = currentUserTpl
 	usersC.Templates.ForgotPassword = forgotPasswordTpl
 	usersC.Templates.CheckYourEmail = checkEmailTpl
 	usersC.Templates.ResetPassword = resetPwTpl
+
+	// gallery routes
+	galleriesC.Templates.New = galleriesNewTpl
 
 	csrfKey := viper.GetString("CSRF_KEY")
 	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(viper.GetBool("CSRF_SECURE")))
@@ -120,6 +136,7 @@ func main() {
 		r.Use(umw.RequireUser)
 		r.Get("/", usersC.CurrentUser)
 	})
+	r.Get("/galleries/new", galleriesC.New)
 	r.NotFound(notFound)
 
 	svr.ListenAndServe()
