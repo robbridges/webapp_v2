@@ -36,7 +36,9 @@ func (g Galleries) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Create(err)
 		g.Templates.New.Execute(w, r, data, err)
+		return
 	}
+
 	//TODO implement this page
 	editPath := fmt.Sprintf("/galleries/%d/edit", gallery.ID)
 	http.Redirect(w, r, editPath, http.StatusFound)
