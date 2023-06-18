@@ -143,9 +143,9 @@ func main() {
 			r.Use(umw.RequireUser)
 			r.Get("/new", galleriesC.New)
 			r.Get("/{id}/edit", galleriesC.Edit)
+			r.Get("/index", galleriesC.Index)
 			r.Post("/", galleriesC.Create)
 			r.Post("/{id}", galleriesC.Update)
-
 		})
 	})
 	r.NotFound(notFound)

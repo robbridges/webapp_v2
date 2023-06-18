@@ -12,8 +12,9 @@ import (
 
 type Galleries struct {
 	Templates struct {
-		New  Template
-		Edit Template
+		New   Template
+		Edit  Template
+		Index Template
 	}
 	GalleryService *models.GalleryService
 }
@@ -67,6 +68,7 @@ func (g Galleries) Edit(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	if gallery.UserID != user.ID {
 		http.Error(w, "you do not have permission to edit this gallery, only the owner can", http.StatusForbidden)
+		return
 	}
 
 	var data struct {
@@ -84,6 +86,7 @@ func (g Galleries) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusFound)
+		return
 	}
 
 	gallery, err := g.GalleryService.ByID(id)
@@ -99,6 +102,7 @@ func (g Galleries) Update(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	if gallery.UserID != user.ID {
 		http.Error(w, "you do not have permission to edit this gallery, only the owner can", http.StatusForbidden)
+		return
 	}
 
 	gallery.Title = r.FormValue("title")
@@ -110,5 +114,33 @@ func (g Galleries) Update(w http.ResponseWriter, r *http.Request) {
 
 	editPath := fmt.Sprintf("/galleries/%d/edit", gallery.ID)
 	http.Redirect(w, r, editPath, http.StatusFound)
+}
+
+func (g Galleries) Index(w http.ResponseWriter, r *http.Request) {
+	logger := r.Context().Value("logger").(models.LogInterface)
+	type Gallery struct {
+		ID    int
+		Title string
+	}
+
+	var data struct {
+		Galleries []Gallery
+	}
+	user := context.User(r.Context())
+
+	galleries, err := g.GalleryService.ByUserID(user.ID)
+	if err != nil {
+		logger.Create(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+	for _, gallery := range galleries {
+		data.Galleries = append(data.Galleries, Gallery{
+			ID:    gallery.ID,
+			Title: gallery.Title,
+		})
+	}
+
+	g.Templates.Index.Execute(w, r, data)
 
 }
