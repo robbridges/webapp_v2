@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/robbridges/webapp_v2/context"
 	"github.com/robbridges/webapp_v2/models"
+	"math/rand"
 	"net/http"
 	"strconv"
 )
@@ -13,6 +14,7 @@ import (
 type Galleries struct {
 	Templates struct {
 		New   Template
+		Show  Template
 		Edit  Template
 		Index Template
 	}
@@ -46,6 +48,43 @@ func (g Galleries) Create(w http.ResponseWriter, r *http.Request) {
 
 	editPath := fmt.Sprintf("/galleries/%d/edit", gallery.ID)
 	http.Redirect(w, r, editPath, http.StatusFound)
+}
+
+func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
+	logger := r.Context().Value("logger").(models.LogInterface)
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusFound)
+	}
+
+	gallery, err := g.GalleryService.ByID(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoData) {
+			http.Error(w, "Gallery not found", http.StatusFound)
+			return
+		}
+		logger.Create(err)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	var data struct {
+		ID     int
+		Title  string
+		Images []string
+	}
+
+	data.ID = gallery.ID
+	data.Title = gallery.Title
+
+	// fake images
+	for i := 0; i < 20; i++ {
+		w, h := rand.Intn(500)+200, rand.Intn(500)+200
+		randomImage := fmt.Sprintf("https://placeimg.com/%d/%d/any", w, h)
+		data.Images = append(data.Images, randomImage)
+	}
+	g.Templates.Show.Execute(w, r, data)
+
 }
 
 func (g Galleries) Edit(w http.ResponseWriter, r *http.Request) {
