@@ -47,6 +47,7 @@ func main() {
 	//gallery templates
 	galleriesNewTpl := views.Must(views.ParseFS(templates.FS, "galleries/new.gohtml", "tailwind.gohtml"))
 	gallertiesEditTpl := views.Must(views.ParseFS(templates.FS, "galleries/edit.gohtml", "tailwind.gohtml"))
+	galleriesIndexTpl := views.Must(views.ParseFS(templates.FS, "galleries/index.gohtml", "tailwind.gohtml"))
 
 	cfg := models.DefaultPostgresConfig()
 	db, err := models.Open(cfg)
@@ -109,6 +110,7 @@ func main() {
 	// gallery routes
 	galleriesC.Templates.New = galleriesNewTpl
 	galleriesC.Templates.Edit = gallertiesEditTpl
+	galleriesC.Templates.Index = galleriesIndexTpl
 
 	csrfKey := viper.GetString("CSRF_KEY")
 	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(viper.GetBool("CSRF_SECURE")), csrf.Path("/"))
@@ -143,7 +145,7 @@ func main() {
 			r.Use(umw.RequireUser)
 			r.Get("/new", galleriesC.New)
 			r.Get("/{id}/edit", galleriesC.Edit)
-			r.Get("/index", galleriesC.Index)
+			r.Get("/", galleriesC.Index)
 			r.Post("/", galleriesC.Create)
 			r.Post("/{id}", galleriesC.Update)
 		})
