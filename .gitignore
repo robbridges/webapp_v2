@@ -4,3 +4,4 @@ makefile
 local.env
 cmd/
 coverage.*
+images/
