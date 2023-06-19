@@ -51,20 +51,8 @@ func (g Galleries) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
-	logger := r.Context().Value("logger").(models.LogInterface)
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	gallery, err := g.galleryByID(w, r)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusFound)
-	}
-
-	gallery, err := g.GalleryService.ByID(id)
-	if err != nil {
-		if errors.Is(err, models.ErrNoData) {
-			http.Error(w, "Gallery not found", http.StatusFound)
-			return
-		}
-		logger.Create(err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
 
@@ -88,20 +76,8 @@ func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Galleries) Edit(w http.ResponseWriter, r *http.Request) {
-	logger := r.Context().Value("logger").(models.LogInterface)
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	gallery, err := g.galleryByID(w, r)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusFound)
-	}
-
-	gallery, err := g.GalleryService.ByID(id)
-	if err != nil {
-		if errors.Is(err, models.ErrNoData) {
-			http.Error(w, "Gallery not found", http.StatusFound)
-			return
-		}
-		logger.Create(err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
 	user := context.User(r.Context())
@@ -122,22 +98,11 @@ func (g Galleries) Edit(w http.ResponseWriter, r *http.Request) {
 
 func (g Galleries) Update(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(models.LogInterface)
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	gallery, err := g.galleryByID(w, r)
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusFound)
 		return
 	}
 
-	gallery, err := g.GalleryService.ByID(id)
-	if err != nil {
-		if errors.Is(err, models.ErrNoData) {
-			http.Error(w, "Gallery not found", http.StatusFound)
-			return
-		}
-		logger.Create(err)
-		http.Error(w, "something went wrong", http.StatusInternalServerError)
-		return
-	}
 	user := context.User(r.Context())
 	if gallery.UserID != user.ID {
 		http.Error(w, "you do not have permission to edit this gallery, only the owner can", http.StatusForbidden)
@@ -182,4 +147,24 @@ func (g Galleries) Index(w http.ResponseWriter, r *http.Request) {
 
 	g.Templates.Index.Execute(w, r, data)
 
+}
+
+func (g Galleries) galleryByID(w http.ResponseWriter, r *http.Request) (*models.Gallery, error, ) {
+	logger := r.Context().Value("logger").(models.LogInterface)
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusNotFound)
+		return nil, err
+	}
+	gallery, err := g.GalleryService.ByID(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoData) {
+			http.Error(w, "Gallery not found", http.StatusNotFound)
+			return nil, err
+		}
+		logger.Create(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return nil, err
+	}
+	return gallery, nil
 }
