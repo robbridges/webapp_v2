@@ -1,7 +1,7 @@
 {{template "header" .}}
 
 <div class="p-8 w-full">
-    <h1> Edit your gallery</h1>
+    <h1 class="pt-4 pb-8 text-3xl font-bold text-gray-900"> Edit your gallery</h1>
     <form action="/galleries/{{.ID}}" method="post">
         <div class="hidden">
             {{csrfField}}
