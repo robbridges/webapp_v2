@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"path/filepath"
+	"strings"
 )
 
 type Gallery struct {
@@ -13,7 +15,8 @@ type Gallery struct {
 }
 
 type GalleryService struct {
-	DB *sql.DB
+	DB        *sql.DB
+	ImagesDir string
 }
 
 func (svc *GalleryService) Create(title string, userID int) (*Gallery, error) {
@@ -97,4 +100,44 @@ func (svc *GalleryService) Delete(gallery *Gallery) error {
 		return fmt.Errorf("delete gallery: %v", err)
 	}
 	return nil
+}
+
+func (svc *GalleryService) Images(galleryID int) ([]Image, error) {
+	globPattern := filepath.Join(svc.galleryDir(galleryID), "*")
+	allFiles, err := filepath.Glob(globPattern)
+	if err != nil {
+		return nil, fmt.Errorf("retrieving gallery images: %w", err)
+	}
+	var images []Image
+	for _, file := range allFiles {
+		if hasExtension(file, svc.extensions()) {
+			images = append(images, Image{
+				Path: file,
+			})
+		}
+	}
+	return images, nil
+}
+
+func (svc GalleryService) galleryDir(id int) string {
+	imagesDir := svc.ImagesDir
+	if imagesDir == "" {
+		imagesDir = "images"
+	}
+	return filepath.Join(imagesDir, fmt.Sprintf("gallery-%d", id))
+}
+
+func (svc *GalleryService) extensions() []string {
+	return []string{".png", ".jpg", ".jpeg", ".gif"}
+}
+
+func hasExtension(file string, extensions []string) bool {
+	for _, ext := range extensions {
+		file = strings.ToLower(file)
+		ext = strings.ToLower(ext)
+		if filepath.Ext(file) == ext {
+			return true
+		}
+	}
+	return false
 }
