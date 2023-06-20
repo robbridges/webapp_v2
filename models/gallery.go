@@ -112,7 +112,9 @@ func (svc *GalleryService) Images(galleryID int) ([]Image, error) {
 	for _, file := range allFiles {
 		if hasExtension(file, svc.extensions()) {
 			images = append(images, Image{
-				Path: file,
+				GalleryID: galleryID,
+				Path:      file,
+				Filename:  filepath.Base(file),
 			})
 		}
 	}
