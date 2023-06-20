@@ -6,7 +6,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/robbridges/webapp_v2/context"
 	"github.com/robbridges/webapp_v2/models"
-	"math/rand"
 	"net/http"
 	"strconv"
 )
@@ -51,26 +50,40 @@ func (g Galleries) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
+	logger := r.Context().Value("logger").(models.LogInterface)
 	gallery, err := g.galleryByID(w, r)
 	if err != nil {
 		return
+	}
+	type Image struct {
+		GalleryID int
+		Filename  string
 	}
 
 	var data struct {
 		ID     int
 		Title  string
-		Images []string
+		Images []Image
 	}
 
 	data.ID = gallery.ID
 	data.Title = gallery.Title
 
 	// fake images
-	for i := 0; i < 20; i++ {
-		w, h := rand.Intn(500)+200, rand.Intn(500)+200
-		randomImage := fmt.Sprintf("https://placeimg.com/%d/%d/any", w, h)
-		data.Images = append(data.Images, randomImage)
+	images, err := g.GalleryService.Images(gallery.ID)
+	if err != nil {
+		logger.Create(err)
+		http.Error(w, "Could not load images", http.StatusInternalServerError)
+		return
 	}
+
+	for _, image := range images {
+		data.Images = append(data.Images, Image{
+			GalleryID: gallery.ID,
+			Filename:  image.Filename,
+		})
+	}
+
 	g.Templates.Show.Execute(w, r, data)
 
 }
