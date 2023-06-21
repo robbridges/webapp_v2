@@ -129,7 +129,7 @@ func (svc GalleryService) Image(galleryID int, filename string) (Image, error) {
 		if errors.Is(err, fs.ErrNotExist) {
 			return Image{}, ErrNoData
 		}
-		return Image{}, fmt.Errorf("querying for image: w", err)
+		return Image{}, fmt.Errorf("querying for image: %w", err)
 	}
 
 	return Image{
