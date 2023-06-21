@@ -7,6 +7,7 @@ import (
 	"github.com/robbridges/webapp_v2/context"
 	"github.com/robbridges/webapp_v2/models"
 	"net/http"
+	"net/url"
 	"strconv"
 )
 
@@ -56,8 +57,9 @@ func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	type Image struct {
-		GalleryID int
-		Filename  string
+		GalleryID       int
+		Filename        string
+		FilenameEscaped string
 	}
 
 	var data struct {
@@ -69,7 +71,6 @@ func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
 	data.ID = gallery.ID
 	data.Title = gallery.Title
 
-	// fake images
 	images, err := g.GalleryService.Images(gallery.ID)
 	if err != nil {
 		logger.Create(err)
@@ -79,8 +80,9 @@ func (g Galleries) Show(w http.ResponseWriter, r *http.Request) {
 
 	for _, image := range images {
 		data.Images = append(data.Images, Image{
-			GalleryID: gallery.ID,
-			Filename:  image.Filename,
+			GalleryID:       gallery.ID,
+			Filename:        image.Filename,
+			FilenameEscaped: url.PathEscape(image.Filename),
 		})
 	}
 
