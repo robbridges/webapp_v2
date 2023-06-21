@@ -170,6 +170,35 @@ func (g Galleries) Delete(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/galleries", http.StatusFound)
 }
 
+func (g Galleries) Image(w http.ResponseWriter, r *http.Request) {
+	logger := r.Context().Value("logger").(models.LogInterface)
+	filename := chi.URLParam(r, "filename")
+	galleryID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusNotFound)
+	}
+	images, err := g.GalleryService.Images(galleryID)
+	if err != nil {
+		logger.Create(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+	var requstedImage models.Image
+	imageFound := false
+	for _, image := range images {
+		if image.Filename == filename {
+			requstedImage = image
+			imageFound = true
+			break
+		}
+	}
+	if !imageFound {
+		http.Error(w, "Image not found", http.StatusNotFound)
+	}
+
+	http.ServeFile(w, r, requstedImage.Path)
+}
+
 type galleryOpt func(w http.ResponseWriter, r *http.Request, gallery *models.Gallery) error
 
 func (g Galleries) galleryByID(w http.ResponseWriter, r *http.Request, opts ...galleryOpt) (*models.Gallery, error) {
