@@ -153,7 +153,7 @@ func main() {
 			r.Post("/{id}/delete", galleriesC.Delete)
 		})
 		r.Get("/{id}", galleriesC.Show)
-		r.Get("/{id}/images/{filename}", galleriesC.Image)
+		r.Get("/{id}/images/{filename}", galleriesC.Images)
 	})
 	r.NotFound(notFound)
 
