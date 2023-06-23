@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/robbridges/webapp_v2/context"
 	"github.com/robbridges/webapp_v2/models"
+	"io"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -237,6 +238,35 @@ func (g Galleries) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	}
 	editPath := fmt.Sprintf("/galleries/%d/edit", gallery.ID)
 	http.Redirect(w, r, editPath, http.StatusFound)
+}
+
+func (g Galleries) UploadImage(w http.ResponseWriter, r *http.Request) {
+	logger := r.Context().Value("logger").(models.LogInterface)
+	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
+	if err != nil {
+		return
+	}
+	err = r.ParseMultipartForm(5 << 20)
+	if err != nil {
+		logger.Create(err)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+	fileHeaders := r.MultipartForm.File["images"]
+
+	for _, fileHeader := range fileHeaders {
+		file, err := fileHeader.Open()
+		if err != nil {
+			logger.Create(err)
+			http.Error(w, "something went wrong", http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+		fmt.Printf("Attempting to upload %v for gallery %d.\n", fileHeader.Filename, gallery.ID)
+		io.Copy(w, file)
+		return
+	}
+
 }
 
 type galleryOpt func(w http.ResponseWriter, r *http.Request, gallery *models.Gallery) error
