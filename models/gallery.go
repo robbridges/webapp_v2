@@ -122,14 +122,14 @@ func (svc *GalleryService) Images(galleryID int) ([]Image, error) {
 	}
 	return images, nil
 }
-func (svc GalleryService) Image(galleryID int, filename string) (Image, error) {
+func (svc *GalleryService) Image(galleryID int, filename string) (Image, error) {
 	imagePath := filepath.Join(svc.galleryDir(galleryID), filename)
 	_, err := os.Stat(imagePath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			return Image{}, ErrNoData
 		}
-		return Image{}, fmt.Errorf("querying for image: %w", err)
+		return Image{}, fmt.Errorf("querying for image: %v", err)
 	}
 
 	return Image{
@@ -139,7 +139,20 @@ func (svc GalleryService) Image(galleryID int, filename string) (Image, error) {
 	}, nil
 }
 
-func (svc GalleryService) galleryDir(id int) string {
+func (svc *GalleryService) DeleteImage(galleryID int, filename string) error {
+	image, err := svc.Image(galleryID, filename)
+	if err != nil {
+		return fmt.Errorf("deleting image: %v", err)
+	}
+
+	err = os.Remove(image.Path)
+	if err != nil {
+		return fmt.Errorf("deleting image %v", err)
+	}
+	return nil
+}
+
+func (svc *GalleryService) galleryDir(id int) string {
 	imagesDir := svc.ImagesDir
 	if imagesDir == "" {
 		imagesDir = "images"
