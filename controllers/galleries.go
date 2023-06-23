@@ -8,6 +8,7 @@ import (
 	"github.com/robbridges/webapp_v2/models"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
 )
 
@@ -198,7 +199,7 @@ func (g Galleries) Delete(w http.ResponseWriter, r *http.Request) {
 
 func (g Galleries) Images(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(models.LogInterface)
-	filename := chi.URLParam(r, "filename")
+	filename := g.filename(w, r)
 	galleryID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusNotFound)
@@ -219,7 +220,7 @@ func (g Galleries) Images(w http.ResponseWriter, r *http.Request) {
 func (g Galleries) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	logger := r.Context().Value("logger").(models.LogInterface)
 
-	filename := chi.URLParam(r, "filename")
+	filename := g.filename(w, r)
 	gallery, err := g.galleryByID(w, r, userMustOwnGallery)
 	if err != nil {
 		return
@@ -239,6 +240,12 @@ func (g Galleries) DeleteImage(w http.ResponseWriter, r *http.Request) {
 }
 
 type galleryOpt func(w http.ResponseWriter, r *http.Request, gallery *models.Gallery) error
+
+func (g Galleries) filename(w http.ResponseWriter, r *http.Request) string {
+	filename := chi.URLParam(r, "filename")
+	filename = filepath.Base(filename)
+	return filename
+}
 
 func (g Galleries) galleryByID(w http.ResponseWriter, r *http.Request, opts ...galleryOpt) (*models.Gallery, error) {
 	logger := r.Context().Value("logger").(models.LogInterface)
