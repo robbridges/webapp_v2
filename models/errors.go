@@ -25,28 +25,29 @@ func CheckContentType(r io.ReadSeeker, allowedTypes []string) error {
 	testBytes := make([]byte, 512)
 	_, err := r.Read(testBytes)
 	if err != nil {
-		return fmt.Errorf("checking content type: %v", err)
+		return fmt.Errorf("checking content type: %w", err)
 	}
 	_, err = r.Seek(0, 0)
 	if err != nil {
-		return fmt.Errorf("checking content type: %v", err)
+		return fmt.Errorf("checking content type: %w", err)
 	}
-	contentTypes := http.DetectContentType(testBytes)
+
+	contentType := http.DetectContentType(testBytes)
 	for _, t := range allowedTypes {
-		if contentTypes == t {
+		if contentType == t {
 			return nil
 		}
 	}
 	return FileError{
-		Issue: fmt.Sprintf("invalid content type"),
+		Issue: fmt.Sprintf("invalid content type: %v", contentType),
 	}
 }
 
 func checkExtension(filename string, allowedExtensions []string) error {
-	if hasExtension(filename, allowedExtensions) {
-		return nil
+	if !hasExtension(filename, allowedExtensions) {
+		return FileError{
+			Issue: fmt.Sprintf("invalid extension: %v", filepath.Ext(filename)),
+		}
 	}
-	return FileError{
-		Issue: fmt.Sprintf("invalid extension: %v", filepath.Ext(filename)),
-	}
+	return nil
 }

@@ -99,8 +99,9 @@ func (svc *GalleryService) Delete(gallery *Gallery) error {
 	DELETE from galleries
 	WHERE id = $1;`, gallery.ID,
 	)
+	err = os.RemoveAll(svc.galleryDir(gallery.ID))
 	if err != nil {
-		return fmt.Errorf("delete gallery: %v", err)
+		return fmt.Errorf("delete gallery images: %w", err)
 	}
 	return nil
 }
