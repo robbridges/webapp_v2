@@ -450,7 +450,7 @@ func TestUsers_Create(t *testing.T) {
 		}
 
 		// Assert redirection
-		if w.Header().Get("Location") != "/currentuser" {
+		if w.Header().Get("Location") != "/galleries" {
 			t.Errorf("unexpected redirect location: got %v, want %v", w.Header().Get("Location"), "/currentuser")
 		}
 
