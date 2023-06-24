@@ -117,7 +117,7 @@ func main() {
 	csrfKey := viper.GetString("CSRF_KEY")
 	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(viper.GetBool("CSRF_SECURE")), csrf.Path("/"))
 	svr := http.Server{
-		Addr:    ":8080",
+		Addr:    viper.GetString("SERVER_PORT"),
 		Handler: r,
 	}
 

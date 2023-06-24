@@ -2,6 +2,6 @@ lenslocked
 
 makefile
 local.env
-cmd/
+cmd/exp
 coverage.*
 images/
