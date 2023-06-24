@@ -124,9 +124,19 @@ func (svc *GalleryService) Images(galleryID int) ([]Image, error) {
 	return images, nil
 }
 
-func (svc *GalleryService) CreateImage(galleryID int, filename string, contents io.Reader) error {
+func (svc *GalleryService) CreateImage(galleryID int, filename string, contents io.ReadSeeker) error {
+	err := CheckContentType(contents, svc.imageContentTypes())
+	if err != nil {
+		return fmt.Errorf("creating image: %v: %v", filename, err)
+	}
+
+	err = checkExtension(filename, svc.extensions())
+	if err != nil {
+		return fmt.Errorf("creating image: %v: %v", filename, err)
+	}
+
 	galleryDir := svc.galleryDir(galleryID)
-	err := os.MkdirAll(galleryDir, 0755)
+	err = os.MkdirAll(galleryDir, 0755)
 	if err != nil {
 		return fmt.Errorf("create gallery-%d directory: %v", galleryID, err)
 	}
@@ -185,6 +195,10 @@ func (svc *GalleryService) galleryDir(id int) string {
 
 func (svc *GalleryService) extensions() []string {
 	return []string{".png", ".jpg", ".jpeg", ".gif"}
+}
+
+func (svc *GalleryService) imageContentTypes() []string {
+	return []string{"image/png", "image/jpeg", "image/gif"}
 }
 
 func hasExtension(file string, extensions []string) bool {
